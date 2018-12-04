@@ -1,0 +1,38 @@
+version: "3.5"
+services:
+  database:
+    image: mysql:5.7.23
+    environment:
+      MYSQL_ROOT_PASSWORD: toor
+      MYSQL_DATABASE: database
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+  application:
+    image: zephinzer/golang-dev:latest
+    user: ${UID}
+    entrypoint: ["start"]
+    environment:
+      DB_HOST: database
+      DB_PORT: "3306"
+      DB_DATABASE: database
+      DB_USER: user
+      DB_PASSWORD: password
+    volumes:
+    - "./:/go/src/app"
+    depends_on:
+    - database
+  migrator:
+    image: zephinzer/golang-dev:latest
+    user: ${UID}
+    entrypoint: ["start", "--migrate"]
+    environment:
+      DB_HOST: database
+      DB_PORT: "3306"
+      DB_DATABASE: database
+      DB_USER: user
+      DB_PASSWORD: password
+    volumes:
+    - "./:/go/src/app"
+    - "./.cache/pkg:/go/pkg"
+    depends_on:
+    - database
