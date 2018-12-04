@@ -4,14 +4,23 @@ import (
 	"runtime/debug"
 	"strings"
 
+	joonix "github.com/joonix/log"
 	"github.com/sirupsen/logrus"
 )
 
 type Logger struct{}
 
 // Init initialises the logger
-func (*Logger) init() {
-	logrus.SetFormatter(&logrus.JSONFormatter{})
+func (*Logger) init(environment string) {
+	switch strings.ToLower(environment) {
+	case "production":
+		logrus.SetLevel(logrus.InfoLevel)
+		logrus.SetFormatter(&logrus.JSONFormatter{})
+	case "development":
+		logrus.SetLevel(logrus.TraceLevel)
+		logrus.SetReportCaller(true)
+		logrus.SetFormatter(&joonix.FluentdFormatter{})
+	}
 }
 
 // Debug logs a 'debug' level message

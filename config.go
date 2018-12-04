@@ -6,9 +6,9 @@ import (
 )
 
 type Configuration struct {
+	Environment string
 	Interface string
 	Port string
-	LogLevel string
 	IsMigration bool
 	DatabaseHost string
 	DatabasePort string
@@ -25,9 +25,9 @@ func (self *Configuration) init() {
 }
 
 func (*Configuration) configureEnvironment() {
-	viper.SetDefault("port", "3000")
-	viper.SetDefault("log_level", "trace")
+	viper.SetDefault("environment", "development")
 	viper.SetDefault("interface", "0.0.0.0")
+	viper.SetDefault("port", "3000")
 	viper.SetDefault("db_host", "database")
 	viper.SetDefault("db_port", "3306")
 	viper.SetDefault("db_database", "database")
@@ -35,9 +35,9 @@ func (*Configuration) configureEnvironment() {
 	viper.SetDefault("db_password", "password")
 	viper.AutomaticEnv()
 	config = Configuration{
-		LogLevel: viper.GetString("log_level"),
-		Port: viper.GetString("port"),
+		Environment: viper.GetString("environment"),
 		Interface: viper.GetString("interface"),
+		Port: viper.GetString("port"),
 		DatabaseHost: viper.GetString("db_host"),
 		DatabasePort: viper.GetString("db_port"),
 		DatabaseDB: viper.GetString("db_database"),

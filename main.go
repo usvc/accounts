@@ -20,13 +20,12 @@ func main() {
 		}
 	}()
 	fmt.Println(applicationStartImage)
-	logger.init()
+	logger.init(config.Environment)
 	config.init()
-	logger.infof("usvc/accounts service started at %s", time.Now().Format(time.RFC1123Z))
-	logger.infof("log level set to %s", strings.ToUpper(config.LogLevel))
+	logger.infof("usvc/accounts started in %s environment at %s", strings.ToUpper(config.Environment), time.Now().Format(time.RFC1123Z))
 	if config.IsMigration {
 		logger.info("performing migration...")
-		migrator.run(MigratorOptions{
+		migrator.run(&migratorOptions{
 			Host:     config.DatabaseHost,
 			Port:     config.DatabasePort,
 			Database: config.DatabaseDB,
@@ -34,6 +33,10 @@ func main() {
 			Password: config.DatabasePassword,
 		})
 	} else {
-		logger.infof("listening on %s:%s", config.Interface, config.Port)
+		logger.info("starting service...")
+		server.init(&serverOptions{
+			Interface: config.Interface,
+			Port:      config.Port,
+		})
 	}
 }

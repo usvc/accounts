@@ -7,9 +7,9 @@ services:
       MYSQL_DATABASE: database
       MYSQL_USER: user
       MYSQL_PASSWORD: password
-  application:
+  app:
     image: zephinzer/golang-dev:latest
-    user: ${UID}
+    user: "${UID}"
     entrypoint: ["start"]
     environment:
       DB_HOST: database
@@ -17,13 +17,17 @@ services:
       DB_DATABASE: database
       DB_USER: user
       DB_PASSWORD: password
+      PORT: "54321"
+    ports:
+    - "54321:54321"
     volumes:
-    - "./:/go/src/app"
+    - "./:/go/src/app:rw"
+    - "./.cache/pkg:/go/pkg:rw"
     depends_on:
     - database
   migrator:
     image: zephinzer/golang-dev:latest
-    user: ${UID}
+    user: "${UID}"
     entrypoint: ["start", "--migrate"]
     environment:
       DB_HOST: database
@@ -32,7 +36,7 @@ services:
       DB_USER: user
       DB_PASSWORD: password
     volumes:
-    - "./:/go/src/app"
-    - "./.cache/pkg:/go/pkg"
+    - "./:/go/src/app:rw"
+    - "./.cache/pkg:/go/pkg:rw"
     depends_on:
     - database

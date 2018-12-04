@@ -2,6 +2,8 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
+	"time"
 
 	"github.com/golang-migrate/migrate"
 	"github.com/golang-migrate/migrate/database"
@@ -10,9 +12,13 @@ import (
 )
 
 type Migrator struct {
+	db       *sql.DB
+	driver   database.Driver
+	instance *migrate.Migrate
+	options  *migratorOptions
 }
 
-type MigratorOptions struct {
+type migratorOptions struct {
 	Host     string
 	Port     string
 	Database string
@@ -20,52 +26,92 @@ type MigratorOptions struct {
 	Password string
 }
 
-var migrator Migrator
-
-func (*Migrator) run(opt MigratorOptions) {
-	connectionString := opt.User + ":" + opt.Password + "@tcp(" + opt.Host + ":" + opt.Port + ")/" + opt.Database
-	db := migrator.getConnection(connectionString)
-	driver := migrator.getDriver(db)
-	migratorInstance := migrator.getDatabaseInstance(driver)
-	migrator.migrateToLatest(migratorInstance)
-	migratorInstance.Close()
+type migratorConstSettings struct {
+	maxRetries      uint
+	retryIntervalMs uint
 }
 
-func (*Migrator) migrateToLatest(migratorInstance *migrate.Migrate) {
-	version, dirty, err := migratorInstance.Version()
+var migratorSettings = migratorConstSettings{
+	maxRetries:      3,
+	retryIntervalMs: 5000,
+}
+
+var migrator = Migrator{}
+
+func (migrator *Migrator) run(opts *migratorOptions) {
+	migrator.options = opts
+	connectionString := migrator.getConnectionString()
+	migrator.db = migrator.getConnection(connectionString)
+	migrator.driver = migrator.getDriver()
+	migrator.instance = migrator.getDatabaseInstance()
+	migrator.migrateToLatest()
+	migrator.instance.Close()
+
+	logger.info("migration run completed")
+}
+
+func (migrator *Migrator) getConnectionString() string {
+	logger.infof("connecting to database '%v' at <%v:%v> with user '%v'",
+		migrator.options.Database,
+		migrator.options.Host,
+		migrator.options.Port,
+		migrator.options.User,
+	)
+	return fmt.Sprintf("%v:%v@tcp(%v:%v)/%v",
+		migrator.options.User,
+		migrator.options.Password,
+		migrator.options.Host,
+		migrator.options.Port,
+		migrator.options.Database,
+	)
+}
+
+func (migrator *Migrator) migrateToLatest() {
+	version, dirty, err := migrator.instance.Version()
 	if version == 0 && err.Error() == "no migration" {
 		logger.info("no migrations applied yet")
 	} else {
 		logger.infof("migration version: %v (dirty: %v)", version, dirty)
 	}
 	if dirty == true {
-		logger.warnf("removing dirty migration from version %v", version)
-		if err := migratorInstance.Force(int(version)); err != nil {
-			logger.error(err)
-		} else if err := migratorInstance.Steps(-1); err != nil {
-			logger.error(err)
-		}
+		migrator.rollbackDirtyMigration(version)
 	}
 
 	migrationDone := false
-	var migrationError *error
-	for migrationDone == false && migrationError == nil {
-		if err := migratorInstance.Steps(1); err != nil {
-			if err.Error() == "file does not exist" {
-				logger.infof("migration is up-to-date at version: %v (dirty: %v)", version, dirty)
-				migrationDone = true
-			} else {
-				logger.errorf("migration upward failed with error: %s", err)
-				migrationError = &err
-			}
-		} else if version, dirty, err = migratorInstance.Version(); err != nil {
-			logger.error(err)
-		} else {
-			logger.infof("migration version: %v (dirty: %v)", version, dirty)
-		}
+	for migrationDone == false {
+		migrationDone = migrator.migrateUpwards()
 	}
+}
 
-	logger.info("migration run completed")
+func (migrator *Migrator) rollbackDirtyMigration(version uint) {
+	logger.warnf("removing dirty migration from version %v", version)
+	if err := migrator.instance.Force(int(version)); err != nil {
+		logger.error(err)
+	} else if err := migrator.instance.Steps(-1); err != nil {
+		logger.error(err)
+		panic(err)
+	}
+}
+
+func (migrator *Migrator) migrateUpwards() bool {
+	version, dirty, err := migrator.instance.Version()
+	if err != nil {
+		logger.error(err)
+	}
+	if err := migrator.instance.Steps(1); err != nil {
+		if err.Error() == "file does not exist" {
+			logger.infof("migration is up-to-date at version: %v (dirty: %v)", version, dirty)
+			return true
+		} else {
+			logger.errorf("migration upward failed with error: %s", err)
+			panic(err)
+		}
+	} else if version, dirty, err = migrator.instance.Version(); err != nil {
+		logger.error(err)
+	} else {
+		logger.infof("migration version now at %v (dirty: %v)", version, dirty)
+	}
+	return false
 }
 
 func (*Migrator) getConnection(connection string) *sql.DB {
@@ -77,24 +123,31 @@ func (*Migrator) getConnection(connection string) *sql.DB {
 	}
 }
 
-func (*Migrator) getDriver(databaseConnection *sql.DB) database.Driver {
-	if driver, err := mysql.WithInstance(databaseConnection, &mysql.Config{}); err != nil {
-		logger.errorf("error in getting driver: %s", err)
-		panic(err)
-	} else {
-		return driver
+func (migrator *Migrator) getDriver() database.Driver {
+	var currentTry uint
+	var driver database.Driver
+	var err error
+	for currentTry = 0; currentTry < migratorSettings.maxRetries; currentTry++ {
+		if driver, err = mysql.WithInstance(migrator.db, &mysql.Config{}); err != nil {
+			logger.errorf("failed to get driver (current try: %v/%v), error: %s", currentTry, migratorSettings.maxRetries, err)
+			time.Sleep(time.Duration(migratorSettings.retryIntervalMs) * time.Millisecond)
+		} else {
+			return driver
+		}
 	}
+	logger.errorf("error in getting driver: %s", err)
+	panic(err)
 }
 
-func (*Migrator) getDatabaseInstance(driver database.Driver) *migrate.Migrate {
-	if migratorInstance, err := migrate.NewWithDatabaseInstance(
+func (migrator *Migrator) getDatabaseInstance() *migrate.Migrate {
+	if instance, err := migrate.NewWithDatabaseInstance(
 		"file://migrations",
 		"mysql",
-		driver,
+		migrator.driver,
 	); err != nil {
 		logger.errorf("error while creating migrator: %s", err)
 		panic(err)
 	} else {
-		return migratorInstance
+		return instance
 	}
 }
