@@ -1,5 +1,3 @@
-.cache
 .vscode
-vendor
 app
 *.out
