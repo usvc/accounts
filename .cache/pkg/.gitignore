@@ -1,2 +1,4 @@
+# this directory should exist with user permissions so that
+# the docker engine will not set it to root
 *
 !.gitignore

@@ -34,7 +34,7 @@ func main() {
 		})
 	} else {
 		logger.info("starting service...")
-		server.init(&serverOptions{
+		server.init(&ServerOptions{
 			Interface: config.Interface,
 			Port:      config.Port,
 		})

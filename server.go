@@ -7,22 +7,26 @@ import (
 )
 
 type Server struct {
-	options *serverOptions
-	handler *http.Handler
+	options *ServerOptions
+	router  *http.ServeMux
 }
 
-type serverOptions struct {
+type ServerOptions struct {
 	Port      string
 	Interface string
 }
 
+var (
+	ServerErrorOkay = "E_SERVER_OK"
+)
+
 var server = Server{}
 
-func (server *Server) init(opts *serverOptions) {
+func (server *Server) init(opts *ServerOptions) {
 	server.options = opts
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "hello")
-	})
+	server.router = http.NewServeMux()
+	userApi.handle(server.router)
+	// server.handle(server.router)
 	server.listen()
 }
 
@@ -30,7 +34,7 @@ func (server *Server) listen() {
 	server.prelisten()
 	bindingInterface := fmt.Sprintf("%v:%v", server.options.Interface, server.options.Port)
 	logger.infof("listening on %v", bindingInterface)
-	logger.error(http.ListenAndServe(bindingInterface, nil))
+	logger.error(http.ListenAndServe(bindingInterface, server.router))
 }
 
 func (server *Server) prelisten() {
@@ -45,4 +49,15 @@ func (server *Server) prelisten() {
 	} else if value < 1000 || value >= 1<<16 {
 		panic("port is invalid (1000 <= port <= 65536)")
 	}
+}
+
+func (server *Server) handle(router *http.ServeMux) {
+	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		response := Response{
+			ErrorCode: ServerErrorOkay,
+			Message:   "ok",
+			Data:      "ok",
+		}
+		response.send(w)
+	})
 }
