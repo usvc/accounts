@@ -1,15 +1,26 @@
 # usvc/accounts
 An accounts microservice.
 
-# endpoints
+# Scope of Component
+
+- [ ] Register a new user
+- [ ] Update a user's account information
+- [ ] Allow a user to login
+- [ ] Allow a user to logout
+- [ ] Delete a user
+
+# Endpoints
 
 | Method | Endpoint | Description | Version |
 | --- | --- | --- | --- |
-| POST | /user | Creates a new user | **TODO** |
+| POST | /user | Register a new user | **TODO** |
 | GET | /user/:id | Returns the ID of a user | **TODO** |
 | PATCH | /user/:id | Updates a field of the user identifie by :id | **TODO** |
 | PUT | /user/:id | Replaces the data of the user identified by :id | **TODO** |
 | DELETE | /user/:id | Deletes the user identified by :id | **TODO** |
+| POST | /session | Logs a user in | **TODO** |
+| DELETE | /session | Logs a user out | **TODO** |
+
 
 # Configuration
 
