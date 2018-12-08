@@ -38,7 +38,17 @@ An accounts microservice.
 > Refer to [config.go](./config.go) for details
 
 # Development
+
 Run `make start` to get started in development.
+
+Run `make test` to run automated tests.
+
+# Contribution
+
+1. [Create a new issue](https://github.com/usvc/accounts/issues/new)
+2. Make changes to the codebase
+3. Prefix your commits with a `[#?]` where `?` is the issue number
+4. Push your changes
 
 # license
 This project is licensed under [the MIT license](./LICENSE).
