@@ -8,6 +8,10 @@ github.com/golang-migrate/migrate/database
 github.com/golang-migrate/migrate/database/mysql
 github.com/golang-migrate/migrate/source/file
 github.com/golang-migrate/migrate/source
+# github.com/gorilla/context v1.1.1
+github.com/gorilla/context
+# github.com/gorilla/mux v1.6.2
+github.com/gorilla/mux
 # github.com/hashicorp/hcl v1.0.0
 github.com/hashicorp/hcl
 github.com/hashicorp/hcl/hcl/printer

@@ -13,7 +13,7 @@ run: build
 shell:
 	@$(MAKE) dev ARG="shell"
 dev:
-	@docker run -it --network host -u $$(id -u) -v "$(CURDIR):/go/src/app" zephinzer/golang-dev:latest ${ARG}
+	@docker run -it --network host -u $$(id -u) -v "$(CURDIR)/.cache/pkg:/go/pkg" -v "$(CURDIR):/go/src/app" zephinzer/golang-dev:latest ${ARG}
 version.get:
 	@docker run -v "$(CURDIR):/app" zephinzer/vtscripts:latest get-latest -q
 version.bump:

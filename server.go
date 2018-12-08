@@ -26,7 +26,7 @@ func (server *Server) init(opts *ServerOptions) {
 	server.options = opts
 	server.router = http.NewServeMux()
 	userApi.handle(server.router)
-	// server.handle(server.router)
+	server.handle(server.router)
 	server.listen()
 }
 
