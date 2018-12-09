@@ -17,7 +17,7 @@ See [the Roadmap section](#roadmap) for future developements.
 
 | Method | Endpoint | Description | Version | Reference |
 | --- | --- | --- | --- | --- |
-| POST | /user | Register a new user | 0.0.1 | [#1](i1) |
+| POST | /user | Register a new user | 0.0.1 | [#1](#1) |
 | GET | /user/:uuid | Returns the user identified by the :uuid | 0.0.1 | [#2](i2) |
 | PATCH | /user/:uuid | Updates a field of the user identified by :uuid | **TODO** | N/A |
 | PUT | /user/:uuid | Replaces the data of the user identified by :uuid | **TODO** | N/A |
