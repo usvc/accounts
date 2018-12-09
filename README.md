@@ -17,11 +17,11 @@ See [the Roadmap section](#roadmap) for future developements.
 
 | Method | Endpoint | Description | Version |
 | --- | --- | --- | --- |
-| POST | /user | Register a new user | **TODO** |
-| GET | /user/:id | Returns the ID of a user | **TODO** |
+| POST | /user | Register a new user | 0.0.1 |
+| GET | /user/:uuid | Returns the user identified by the :uuid | 0.0.1 |
 | PATCH | /user/:id | Updates a field of the user identifie by :id | **TODO** |
 | PUT | /user/:id | Replaces the data of the user identified by :id | **TODO** |
-| DELETE | /user/:id | Deletes the user identified by :id | **TODO** |
+| DELETE | /user/:uuid | Deletes the user identified by the :uuid | 0.0.1 |
 | POST | /session | Logs a user in | **TODO** |
 | DELETE | /session | Logs a user out | **TODO** |
 | GET | /metrics | Returns Prometheus metrics | **TODO** |

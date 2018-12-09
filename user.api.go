@@ -9,6 +9,7 @@ import (
 )
 
 var UserApiErrorOK = "E_USER_API_OK"
+var UserApiErrorDeleteOK = "E_USER_API_ERROR_DELETE_OK"
 var UserApiErrorInvalidParameters = "E_USER_API_INVALID_PARAMS"
 var UserApiErrorCreateOk = "E_USER_API_CREATE_OK"
 var UserApiErrorCreateGeneric = "E_USER_API_CREATE_GENERIC"
@@ -23,11 +24,28 @@ func (userApi *UserAPI) handle(router *http.ServeMux) {
 	userApi.router = mux.NewRouter()
 	UserAPIGetUserByUuid(userApi.router)
 	UserAPICreateUser(userApi.router)
+	UserAPIDeleteUserByUuid(userApi.router)
 	router.Handle(UserApiUrlStub, userApi.router)
 	router.Handle(UserApiExtUrlStub, userApi.router)
 }
 
 var userApi = UserAPI{}
+
+func UserAPIDeleteUserByUuid(router *mux.Router) {
+	router.HandleFunc(
+		UserApiUrlStub+"/{uuid}",
+		func(w http.ResponseWriter, r *http.Request) {
+			vars := mux.Vars(r)
+			user.DeleteByUuid(vars["uuid"])
+			response := Response{
+				UserApiErrorDeleteOK,
+				"ok",
+				map[string]interface{}{"uuid": vars["uuid"]},
+			}
+			response.send(w)
+		},
+	).Methods("DELETE")
+}
 
 func UserAPIGetUserByUuid(router *mux.Router) {
 	router.HandleFunc(

@@ -13,6 +13,7 @@ type Response struct {
 }
 
 func (response *Response) send(w http.ResponseWriter) {
+	w.Header().Set("Content-Type", "application/json")
 	body, err := json.Marshal(response)
 	if err != nil {
 		panic(err)
