@@ -15,18 +15,18 @@ See [the Roadmap section](#roadmap) for future developements.
 
 # Endpoints
 
-| Method | Endpoint | Description | Version |
-| --- | --- | --- | --- |
-| POST | /user | Register a new user | 0.0.1 |
-| GET | /user/:uuid | Returns the user identified by the :uuid | 0.0.1 |
-| PATCH | /user/:id | Updates a field of the user identifie by :id | **TODO** |
-| PUT | /user/:id | Replaces the data of the user identified by :id | **TODO** |
-| DELETE | /user/:uuid | Deletes the user identified by the :uuid | 0.0.1 |
-| POST | /session | Logs a user in | **TODO** |
-| DELETE | /session | Logs a user out | **TODO** |
-| GET | /metrics | Returns Prometheus metrics | **TODO** |
-| GET | /healthz | Returns 200 OK if healthy | **TODO** |
-| GET | /readyz | Returns 200 OK if ready to accept connections | **TODO** |
+| Method | Endpoint | Description | Version | Reference |
+| --- | --- | --- | --- | --- |
+| POST | /user | Register a new user | 0.0.1 | #1 |
+| GET | /user/:uuid | Returns the user identified by the :uuid | 0.0.1 | #2 |
+| PATCH | /user/:uuid | Updates a field of the user identified by :uuid | **TODO** | N/A |
+| PUT | /user/:uuid | Replaces the data of the user identified by :uuid | **TODO** | N/A |
+| DELETE | /user/:uuid | Deletes the user identified by the :uuid | 0.0.1 | #3 |
+| POST | /session | Logs a user in | **TODO** | N/A |
+| DELETE | /session | Logs a user out | **TODO** | N/A |
+| GET | /metrics | Returns Prometheus metrics | **TODO** | N/A |
+| GET | /healthz | Returns 200 OK if healthy | **TODO** | N/A |
+| GET | /readyz | Returns 200 OK if ready to accept connections | **TODO** | N/A |
 
 > Refer to [user.api.go](./user.api.go) for details on the user endpoints.  
 > Refer to [session.api.go](./session.api.go) for details on the session endpoints.
