@@ -8,10 +8,12 @@ import (
 	"github.com/gorilla/mux"
 )
 
-var UserErrorOk = "E_USER_OK"
-var UserErrorInvalidParameters = "E_INVALID_PARAMS"
-var UserUrlStub = "/user"
-var UserExtUrlStub = "/user/"
+var UserApiErrorOK = "E_USER_API_OK"
+var UserApiErrorInvalidParameters = "E_USER_API_INVALID_PARAMS"
+var UserApiErrorCreateOk = "E_USER_API_CREATE_OK"
+var UserApiErrorCreateGeneric = "E_USER_API_CREATE_GENERIC"
+var UserApiUrlStub = "/user"
+var UserApiExtUrlStub = "/user/"
 
 type UserAPI struct {
 	router *mux.Router
@@ -20,21 +22,21 @@ type UserAPI struct {
 func (userApi *UserAPI) handle(router *http.ServeMux) {
 	userApi.router = mux.NewRouter()
 	UserAPIGetUserByUuid(userApi.router)
-	UserAPICreatetUser(userApi.router)
-	router.Handle(UserUrlStub, userApi.router)
-	router.Handle(UserExtUrlStub, userApi.router)
+	UserAPICreateUser(userApi.router)
+	router.Handle(UserApiUrlStub, userApi.router)
+	router.Handle(UserApiExtUrlStub, userApi.router)
 }
 
 var userApi = UserAPI{}
 
 func UserAPIGetUserByUuid(router *mux.Router) {
 	router.HandleFunc(
-		UserUrlStub+"/{uuid}",
+		UserApiUrlStub+"/{uuid}",
 		func(w http.ResponseWriter, r *http.Request) {
 			vars := mux.Vars(r)
 			data := user.GetByUuid(vars["uuid"])
 			response := Response{
-				UserErrorOk,
+				UserApiErrorOK,
 				"ok",
 				data,
 			}
@@ -43,20 +45,39 @@ func UserAPIGetUserByUuid(router *mux.Router) {
 	).Methods("GET")
 }
 
-func UserAPICreatetUser(router *mux.Router) {
+func UserAPICreateUser(router *mux.Router) {
 	router.HandleFunc(
-		UserUrlStub,
+		UserApiUrlStub,
 		func(w http.ResponseWriter, r *http.Request) {
+			defer func() {
+				if r := recover(); r != nil {
+					var response Response
+					switch t := r.(type) {
+					case *UserError:
+						w.WriteHeader(400)
+						response = Response{
+							t.Code,
+							t.Message,
+							t.Data,
+						}
+					default:
+						w.WriteHeader(500)
+						response = Response{
+							UserApiErrorCreateGeneric,
+							"",
+							r,
+						}
+					}
+					response.send(w)
+				}
+			}()
 			var newUser UserNew
 			body, _ := ioutil.ReadAll(r.Body)
 			json.Unmarshal(body, &newUser)
-
-			logger.info(newUser)
 			data := user.Create(newUser)
-			logger.info(data)
 
 			response := Response{
-				UserErrorOk,
+				UserApiErrorCreateOk,
 				"ok",
 				data,
 			}

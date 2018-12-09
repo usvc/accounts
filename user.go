@@ -4,25 +4,42 @@ import (
 	"database/sql"
 	"fmt"
 
-	_ "github.com/go-sql-driver/mysql"
+	"github.com/go-sql-driver/mysql"
 )
 
+// User is used for returning user data
 type User struct {
 	Uuid     string `json:"uuid"`
 	Email    string `json:"email"`
 	Username string `json:"username"`
 }
 
+// UserNew is used for incoming users to be created
 type UserNew struct {
 	Email        string `json:"email"`
 	Password     string `json:"password"`
 	PasswordHash string `json:"password_hash"`
 }
 
-var UserErrorCreateOk = "E_USER_CREATE_OK"
+// UserError represents a logical error instead of a system one
+type UserError struct {
+	Message string
+	Code    string
+	Data    interface{}
+}
+
+// Error implementation
+func (userError *UserError) Error() string {
+	return fmt.Sprintf("%v:%v", userError.Code, userError.Message)
+}
+
+var UserErrorCreateDuplicateEntry = "E_USER_CREATE_DUPLICATE"
+var UserErrorCreateGeneric = "E_USER_CREATE_GENERIC"
 var UserErrorCreateMissingParameters = "E_USER_CREATE_MISSING_PARAMS"
 var UserErrorCreateInvalidEmail = "E_USER_CREATE_INVALID_EMAIL"
 var UserErrorCreateInvalidPassword = "E_USER_CREATE_INVALID_PASSWORD"
+
+var userStatementsPrepared = false
 
 var user = User{}
 
@@ -38,16 +55,30 @@ func (user *User) GetByUuid(uuid string) User {
 func (user *User) Create(newUser UserNew) User {
 	// check for missing parameters
 	if len(newUser.Email) == 0 {
-		panic(UserErrorCreateMissingParameters)
+		panic(&UserError{
+			Code:    UserErrorCreateMissingParameters,
+			Message: "missing 'email' parameter",
+		})
 	} else if len(newUser.Password) == 0 {
-		panic(UserErrorCreateMissingParameters)
+		panic(&UserError{
+			Code:    UserErrorCreateMissingParameters,
+			Message: "missing 'password' parameter",
+		})
 	}
 
 	// validate parameters
 	if err := utils.ValidateEmail(newUser.Email); err != nil {
-		panic(UserErrorCreateInvalidEmail)
+		panic(&UserError{
+			Code:    err.Error(),
+			Message: "",
+			Data:    map[string]interface{}{"email": newUser.Email},
+		})
 	} else if err := utils.ValidatePassword(newUser.Password); err != nil {
-		panic(UserErrorCreateInvalidPassword)
+		panic(&UserError{
+			Code:    err.Error(),
+			Message: "",
+			Data:    map[string]interface{}{},
+		})
 	}
 
 	// prepare what to put into the database
@@ -58,41 +89,72 @@ func (user *User) Create(newUser UserNew) User {
 	}
 
 	// put it into the database
-	db, err := sql.Open("mysql", fmt.Sprintf("%v:%v@tcp(%v:%v)/%v",
-		"user",
-		"password",
-		"database",
-		"3306",
-		"database",
-	))
-	if err != nil {
-		panic(err)
-	}
+	userID := user.insertUser(newUser.Email)
+	user.insertSecurity(userID, newUser.PasswordHash)
+	userRow := user.getUserByID(userID)
 
-	err = db.Ping()
-	if err != nil {
-		panic(err)
-	} else {
-		logger.info("it works!")
-	}
+	logger.infof("[user] created user '%s'", userRow.Uuid)
 
-	stmtCreateAccount, err := db.Prepare("INSERT INTO accounts (email) VALUES (?)")
+	return userRow
+}
+
+func (*User) getUserByID(accountId int64) User {
+	stmt, err := db.Get().Prepare("SELECT uuid, email, username FROM accounts WHERE id = ?")
 	if err != nil {
 		panic(err)
 	}
-	result, err := stmtCreateAccount.Exec(newUser.Email)
+	row := stmt.QueryRow(accountId)
 	if err != nil {
 		panic(err)
 	}
-	lastInsertID, err := result.LastInsertId()
+	var uuid sql.NullString
+	var email sql.NullString
+	var username sql.NullString
+	err = row.Scan(&uuid, &email, &username)
 	if err != nil {
 		panic(err)
 	}
-	stmtCreateSecurity, err := db.Prepare("INSERT INTO security (account_id, password) VALUES (?, ?)")
+	return User{
+		Uuid:     uuid.String,
+		Email:    email.String,
+		Username: username.String,
+	}
+}
+
+func (*User) insertUser(email string) int64 {
+	logger.info("[user] adding account data...")
+	stmt, err := db.Get().Prepare("INSERT INTO accounts (email) VALUES (?)")
 	if err != nil {
 		panic(err)
 	}
-	result, err = stmtCreateSecurity.Exec(lastInsertID, newUser.PasswordHash)
+	output, err := stmt.Exec(email)
+	if err != nil {
+		logger.errorf("[user] %v", err)
+		switch err.(*mysql.MySQLError).Number {
+		case 1062:
+			panic(&UserError{
+				Code:    UserErrorCreateDuplicateEntry,
+				Message: "the user already exists",
+				Data:    err,
+			})
+		default:
+			panic(UserErrorCreateGeneric)
+		}
+	}
+	lastInsertID, err := output.LastInsertId()
+	if err != nil {
+		panic(err)
+	}
+	return lastInsertID
+}
+
+func (*User) insertSecurity(accountId int64, passwordHash string) {
+	logger.info("[user] adding account security...")
+	stmt, err := db.Get().Prepare("INSERT INTO security (account_id, password) VALUES (?, ?)")
+	if err != nil {
+		panic(err)
+	}
+	result, err := stmt.Exec(accountId, passwordHash)
 	if err != nil {
 		panic(err)
 	}
@@ -101,25 +163,6 @@ func (user *User) Create(newUser UserNew) User {
 		panic(err)
 	}
 	if rowsAffected != 1 {
-		panic("expected 1 row to be affected but none were")
-	}
-	stmtGetUser, err := db.Prepare("SELECT uuid FROM accounts WHERE id = ?")
-	if err != nil {
-		panic(err)
-	}
-	row := stmtGetUser.QueryRow(lastInsertID)
-	if err != nil {
-		panic(err)
-	}
-	var uuid string
-	err = row.Scan(&uuid)
-	if err != nil {
-		panic(err)
-	}
-	logger.info(uuid)
-
-	return User{
-		Uuid:  uuid,
-		Email: newUser.Email,
+		panic("[user] expected 1 row to be affected but none were")
 	}
 }

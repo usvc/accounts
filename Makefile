@@ -7,11 +7,15 @@ test: build # runs tests in watch-mode
 test.once: build # runs tests once
 	@$(MAKE) _dev ARG="test -coverprofile c.out"
 start: # starts the development environment
-	@UID=$$(id -u) docker-compose up -V migrator app
+	@UID=$$(id -u) docker-compose up -V app
+migrate: # starts the migrator in the development enviornment
+	@UID=$$(id -u) docker-compose run migrator
 start.once: build # runs the application on the host network
 	@$(MAKE) _dev ARG="start"
 db: # creates a shell into the database (requires database to be running)
 	@docker exec -it $$(docker ps | grep $$(basename $$(pwd)) | grep database | cut -f 1 -d ' ') mysql -uroot -ptoor
+logs: # displays the application logs
+	@docker logs -f $$(docker ps | grep $$(basename $$(pwd)) | grep app | cut -f 1 -d ' ')
 version.get: # retrieves the latest version we are at
 	@docker run -v "$(CURDIR):/app" zephinzer/vtscripts:latest get-latest -q
 version.bump: # bumps the version by 1: specify VERSION as "patch", "minor", or "major", to be specific about things

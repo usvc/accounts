@@ -21,11 +21,22 @@ func main() {
 	}()
 	fmt.Println(applicationStartImage)
 	logger.init(config.Environment)
+	logger.info("[main] initialising configurations...")
 	config.Init()
-	logger.infof("usvc/accounts started in %s environment at %s", strings.ToUpper(config.Environment), time.Now().Format(time.RFC1123Z))
+	logger.info("[main] initialising database connection...")
+	db.Init(&DatabaseConnectionOptions{
+		Host:                      config.DatabaseHost,
+		Port:                      config.DatabasePort,
+		Database:                  config.DatabaseDB,
+		User:                      config.DatabaseUser,
+		Password:                  config.DatabasePassword,
+		ConnectionRetryAttempts:   3,
+		ConnectionRetryIntervalMs: 5000,
+	})
+	logger.infof("[main] usvc/accounts started in %s environment at %s", strings.ToUpper(config.Environment), time.Now().Format(time.RFC1123Z))
 	if config.IsMigration {
-		logger.info("performing migration...")
-		migrator.run(&migratorOptions{
+		logger.info("[main] performing migration...")
+		migrator.run(&MigratorConnectionOptions{
 			Host:     config.DatabaseHost,
 			Port:     config.DatabasePort,
 			Database: config.DatabaseDB,
@@ -33,7 +44,7 @@ func main() {
 			Password: config.DatabasePassword,
 		})
 	} else {
-		logger.info("starting service...")
+		logger.info("[main] starting server...")
 		server.init(&ServerOptions{
 			Interface: config.Interface,
 			Port:      config.Port,

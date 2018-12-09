@@ -33,21 +33,21 @@ func (server *Server) init(opts *ServerOptions) {
 func (server *Server) listen() {
 	server.prelisten()
 	bindingInterface := fmt.Sprintf("%v:%v", server.options.Interface, server.options.Port)
-	logger.infof("listening on %v", bindingInterface)
+	logger.infof("[server] listening on %v", bindingInterface)
 	logger.error(http.ListenAndServe(bindingInterface, server.router))
 }
 
 func (server *Server) prelisten() {
 	if server.options == nil {
-		panic("init() was not called before attempting to listen()")
+		panic("[server] init() was not called before attempting to listen()")
 	} else if len(server.options.Interface) == 0 {
-		panic("interface was not provided")
+		panic("[server] interface was not provided")
 	} else if len(server.options.Port) == 0 {
-		panic("port was not provided")
+		panic("[server] port was not provided")
 	} else if value, err := strconv.Atoi(server.options.Port); err != nil {
-		panic("port is not a number")
+		panic("[server] port is not a number")
 	} else if value < 1000 || value >= 1<<16 {
-		panic("port is invalid (1000 <= port <= 65536)")
+		panic("[server] port is invalid (1000 <= port <= 65536)")
 	}
 }
 

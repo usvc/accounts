@@ -15,10 +15,10 @@ type Migrator struct {
 	db       *sql.DB
 	driver   database.Driver
 	instance *migrate.Migrate
-	options  *migratorOptions
+	options  *MigratorConnectionOptions
 }
 
-type migratorOptions struct {
+type MigratorConnectionOptions struct {
 	Host     string
 	Port     string
 	Database string
@@ -38,7 +38,7 @@ var migratorSettings = migratorConstSettings{
 
 var migrator = Migrator{}
 
-func (migrator *Migrator) run(opts *migratorOptions) {
+func (migrator *Migrator) run(opts *MigratorConnectionOptions) {
 	migrator.options = opts
 	connectionString := migrator.getConnectionString()
 	migrator.db = migrator.getConnection(connectionString)
@@ -47,11 +47,11 @@ func (migrator *Migrator) run(opts *migratorOptions) {
 	migrator.migrateToLatest()
 	migrator.instance.Close()
 
-	logger.info("migration run completed")
+	logger.info("[migrator] migration run completed")
 }
 
 func (migrator *Migrator) getConnectionString() string {
-	logger.infof("connecting to database '%v' at <%v:%v> with user '%v'",
+	logger.infof("[migrator] connecting to database '%v' at <%v:%v> with user '%v'",
 		migrator.options.Database,
 		migrator.options.Host,
 		migrator.options.Port,
@@ -69,9 +69,9 @@ func (migrator *Migrator) getConnectionString() string {
 func (migrator *Migrator) migrateToLatest() {
 	version, dirty, err := migrator.instance.Version()
 	if version == 0 && err.Error() == "no migration" {
-		logger.info("no migrations applied yet")
+		logger.info("[migrator] no migrations applied yet")
 	} else {
-		logger.infof("migration version: %v (dirty: %v)", version, dirty)
+		logger.infof("[migrator] migration version: %v (dirty: %v)", version, dirty)
 	}
 	if dirty == true {
 		migrator.rollbackDirtyMigration(version)
@@ -84,7 +84,7 @@ func (migrator *Migrator) migrateToLatest() {
 }
 
 func (migrator *Migrator) rollbackDirtyMigration(version uint) {
-	logger.warnf("removing dirty migration from version %v", version)
+	logger.warnf("[migrator] removing dirty migration from version %v", version)
 	if err := migrator.instance.Force(int(version)); err != nil {
 		logger.error(err)
 	} else if err := migrator.instance.Steps(-1); err != nil {
@@ -100,23 +100,23 @@ func (migrator *Migrator) migrateUpwards() bool {
 	}
 	if err := migrator.instance.Steps(1); err != nil {
 		if err.Error() == "file does not exist" {
-			logger.infof("migration is up-to-date at version: %v (dirty: %v)", version, dirty)
+			logger.infof("[migrator] migration is up-to-date at version: %v (dirty: %v)", version, dirty)
 			return true
 		} else {
-			logger.errorf("migration upward failed with error: %s", err)
+			logger.errorf("[migrator] migration upward failed with error: %s", err)
 			panic(err)
 		}
 	} else if version, dirty, err = migrator.instance.Version(); err != nil {
 		logger.error(err)
 	} else {
-		logger.infof("migration version now at %v (dirty: %v)", version, dirty)
+		logger.infof("[migrator] migration version now at %v (dirty: %v)", version, dirty)
 	}
 	return false
 }
 
 func (*Migrator) getConnection(connection string) *sql.DB {
 	if databaseConnection, err := sql.Open("mysql", connection); err != nil {
-		logger.errorf("error while creating database connection: %s", err)
+		logger.errorf("[migrator] error while creating database connection: %s", err)
 		panic(err)
 	} else {
 		return databaseConnection
@@ -129,13 +129,13 @@ func (migrator *Migrator) getDriver() database.Driver {
 	var err error
 	for currentTry = 0; currentTry < migratorSettings.maxRetries; currentTry++ {
 		if driver, err = mysql.WithInstance(migrator.db, &mysql.Config{}); err != nil {
-			logger.errorf("failed to get driver (current try: %v/%v), error: %s", currentTry, migratorSettings.maxRetries, err)
+			logger.errorf("[migrator] failed to get driver (current try: %v/%v), error: %s", currentTry, migratorSettings.maxRetries, err)
 			time.Sleep(time.Duration(migratorSettings.retryIntervalMs) * time.Millisecond)
 		} else {
 			return driver
 		}
 	}
-	logger.errorf("error in getting driver: %s", err)
+	logger.errorf("[migrator] error in getting driver: %s", err)
 	panic(err)
 }
 
@@ -145,7 +145,7 @@ func (migrator *Migrator) getDatabaseInstance() *migrate.Migrate {
 		"mysql",
 		migrator.driver,
 	); err != nil {
-		logger.errorf("error while creating migrator: %s", err)
+		logger.errorf("[migrator] error while creating migrator: %s", err)
 		panic(err)
 	} else {
 		return instance
