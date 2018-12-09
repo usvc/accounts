@@ -17,13 +17,15 @@ type Configuration struct {
 	DatabasePassword string
 }
 
-var config Configuration
+var config = Configuration{}
 
-func (self *Configuration) init() {
-	self.configureEnvironment()
-	self.configureEntrypoint()
+// Init initialises the configuration module
+func (config *Configuration) Init() {
+	config.configureEnvironment()
+	config.configureEntrypoint()
 }
 
+// configureEnvironment consumes environment variables into config variables
 func (*Configuration) configureEnvironment() {
 	viper.SetDefault("environment", "development")
 	viper.SetDefault("interface", "0.0.0.0")
@@ -46,6 +48,7 @@ func (*Configuration) configureEnvironment() {
 	}
 }
 
+// configureEntrypoint consumes flags and sets the run mode flags
 func (*Configuration) configureEntrypoint() {
 	isMigration := flag.Bool("migrate", false, "indicates whether application should attempt migration")
 	flag.Parse()

@@ -21,7 +21,7 @@ func main() {
 	}()
 	fmt.Println(applicationStartImage)
 	logger.init(config.Environment)
-	config.init()
+	config.Init()
 	logger.infof("usvc/accounts started in %s environment at %s", strings.ToUpper(config.Environment), time.Now().Format(time.RFC1123Z))
 	if config.IsMigration {
 		logger.info("performing migration...")
