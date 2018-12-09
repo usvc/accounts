@@ -1,13 +1,17 @@
 # usvc/accounts
-An accounts microservice.
+An accounts microservice for easy addition of a login requirement to your system
 
 # Scope of Component
 
-- [ ] Register a new user
-- [ ] Update a user's account information
-- [ ] Allow a user to login
-- [ ] Allow a user to logout
-- [ ] Delete a user
+## Version 1.0
+- [ ] Registration of new users using an email address and password
+- [ ] Logging in of existing users via password
+- [ ] Session maintenance of existing users
+- [ ] Logging out of existing users
+- [ ] Updating of existing users' account information
+- [ ] Removal of an existing user from the system
+
+See [the Roadmap section](#roadmap) for future developements.
 
 # Endpoints
 
@@ -20,7 +24,12 @@ An accounts microservice.
 | DELETE | /user/:id | Deletes the user identified by :id | **TODO** |
 | POST | /session | Logs a user in | **TODO** |
 | DELETE | /session | Logs a user out | **TODO** |
+| GET | /metrics | Returns Prometheus metrics | **TODO** |
+| GET | /healthz | Returns 200 OK if healthy | **TODO** |
+| GET | /readyz | Returns 200 OK if ready to accept connections | **TODO** |
 
+> Refer to [user.api.go](./user.api.go) for details on the user endpoints.  
+> Refer to [session.api.go](./session.api.go) for details on the session endpoints.
 
 # Configuration
 
@@ -39,16 +48,61 @@ An accounts microservice.
 
 # Development
 
+You'll need Docker and Docker Compose installed on your machine for the development environment to be provisioned.
+
 Run `make start` to get started in development.
 
 Run `make test` to run automated tests.
 
+> Refer to [the Makefile](./Makefile) for details.
+
+# Deployment
+
+## Support Services
+
+- MySQL database
+
+> Refer to [the Docker Compose file](./docker-compose.yml) for more information on support services required.
+
+## Binary Entrypoints
+
+Run `app` to start the application.
+
+Run `app --migrate` to run the migrations.
+
+> Refer to [main.go](./main.go) for the various usable flags.
+
 # Contribution
 
+## Contributors
 1. [Create a new issue](https://github.com/usvc/accounts/issues/new)
 2. Make changes to the codebase
 3. Prefix your commits with a `[#?]` where `?` is the issue number
 4. Push your changes
 
-# license
+## Others
+1. Fork this repository
+2. [Create a new issue on this repository](https://github.com/usvc/accounts/issues/new)
+3. Make changes to the `master` branch of your fork
+4. Push your changes to your fork
+5. Raise a pull request to this repository and prefix the title with a `[#?]` where `?` is the issue number
+6. Ping a contributor if you're getting impatient
+
+# Roadmap
+
+## Version 2.0
+
+- [ ] Creation of profiles associated with accounts
+- [ ] Registration of new users using Facebook Login
+- [ ] Logging in of existing users via Facebook Login
+- [ ] Registration of new users using Google login
+- [ ] Logging in of existing users via Google Login
+
+## Version 3.0
+
+- [ ] Logging in of existing users via an email message
+- [ ] Audit trail of session creation/destruction
+- [ ] Audit trail of user's actions
+
+# License
 This project is licensed under [the MIT license](./LICENSE).
