@@ -2,14 +2,28 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 
 	"golang.org/x/crypto/bcrypt"
 )
 
+var EmailLocalpartMaxLength = 63
+var EmailDomainpartMaxLength = 253
 var PasswordMinimumLength = 8
 var PasswordMandatorySpecialCharacters = true
 var PasswordMandatoryNumbers = true
+
+var UtilsErrorEmail = "E_EMAIL_INVALID"
+
+type ValidationError struct {
+	Code    string
+	Message string
+}
+
+func (self *ValidationError) Error() string {
+	return fmt.Sprintf("%s: %s", self.Code, self.Message)
+}
 
 type UtilityFunctions struct{}
 
@@ -34,7 +48,7 @@ func (*UtilityFunctions) VerifyPasswordHash(hash string, password string) error 
 func (utility *UtilityFunctions) ValidateEmail(email string) error {
 	emailParts := strings.Split(email, "@")
 	if len(emailParts) != 2 {
-		return errors.New("E_EMAIL_INVALID")
+		return errors.New(UtilsErrorEmail)
 	}
 	localPart := emailParts[0]
 	if err := utility.validateEmailLocalPart(localPart); err != nil {
@@ -51,11 +65,20 @@ func (utility *UtilityFunctions) ValidateEmail(email string) error {
 func (utility *UtilityFunctions) ValidatePassword(password string) error {
 	specialCharacters := "`~!@#$%^&*()_+-={}[]\\|;:'\",<.>/?"
 	if len(password) < PasswordMinimumLength {
-		return errors.New("E_PASSWORD_TOO_SHORT")
+		return &ValidationError{
+			Code:    "E_PASSWORD_TOO_SHORT",
+			Message: fmt.Sprintf("password should be at least of length %v", PasswordMinimumLength),
+		}
 	} else if !strings.ContainsAny(password, specialCharacters) {
-		return errors.New("E_PASSWORD_NO_SPECIAL_CHARACTERS")
+		return &ValidationError{
+			Code:    "E_PASSWORD_NO_SPECIAL_CHARACTERS",
+			Message: "password should contain at least one special character",
+		}
 	} else if !strings.ContainsAny(password, "1234567890") {
-		return errors.New("E_PASSWORD_NO_NUMBERS")
+		return &ValidationError{
+			Code:    "E_PASSWORD_NO_NUMBERS",
+			Message: "password should contain at least one numerical character",
+		}
 	}
 	return nil
 }
@@ -63,17 +86,29 @@ func (utility *UtilityFunctions) ValidatePassword(password string) error {
 func (*UtilityFunctions) validateEmailLocalPart(localPart string) error {
 	specialCharacters := "!#$%^&*()=\\|;:\"'<>,/?[]{}`~"
 	invalidStartingAndEndingCharacters := "-_+."
-	if len(localPart) > 63 {
-		return errors.New("E_EMAIL_LOCALPART_TOO_LONG")
+	if len(localPart) > EmailLocalpartMaxLength {
+		return &ValidationError{
+			Code:    "E_EMAIL_LOCALPART_TOO_LONG",
+			Message: fmt.Sprintf("email username ('%v') should be less than %v characters", localPart, EmailLocalpartMaxLength),
+		}
 	}
 	if strings.ContainsAny(localPart, specialCharacters) {
-		return errors.New("E_EMAIL_SPECIAL_CHARS")
+		return &ValidationError{
+			Code:    "E_EMAIL_LOCALPART_SPECIAL_CHARS",
+			Message: fmt.Sprintf("email username ('%v') should not contain any special characters", localPart),
+		}
 	}
 	if strings.LastIndexAny(localPart, invalidStartingAndEndingCharacters) == len(localPart)-1 {
-		return errors.New("E_EMAIL_INVALID_LOCALPART_POSTFIX")
+		return &ValidationError{
+			Code:    "E_EMAIL_LOCALPART_INVALID_POSTFIX",
+			Message: fmt.Sprintf("email username ('%v') should not end with any of %v", localPart, invalidStartingAndEndingCharacters),
+		}
 	}
 	if strings.IndexAny(localPart, invalidStartingAndEndingCharacters) == 0 {
-		return errors.New("E_EMAIL_INVALID_LOCALPART_PREFIX")
+		return &ValidationError{
+			Code:    "E_EMAIL_LOCALPART_INVALID_PREFIX",
+			Message: fmt.Sprintf("email username ('%v') should not end with any of %v", localPart, invalidStartingAndEndingCharacters),
+		}
 	}
 	return nil
 }
@@ -81,22 +116,37 @@ func (*UtilityFunctions) validateEmailLocalPart(localPart string) error {
 func (UtilityFunctions) validateEmailDomainPart(domainPart string) error {
 	specialCharacters := "!#$%^&*()=\\|;:\"'<>,/?[]{}`~+_"
 	invalidStartingAndEndingCharacters := "-"
-	if len(domainPart) > 253 {
-		return errors.New("E_EMAIL_DOMAIN_TOO_LONG")
+	if len(domainPart) > EmailDomainpartMaxLength {
+		return &ValidationError{
+			Code:    "E_EMAIL_DOMAIN_TOO_LONG",
+			Message: fmt.Sprintf("email domain ('%v') should not be more than length %v", domainPart, EmailDomainpartMaxLength),
+		}
 	}
 	domainParts := strings.Split(domainPart, ".")
 	if len(domainParts) < 2 {
-		return errors.New("E_EMAIL_DOMAINPART_INVALID")
+		return &ValidationError{
+			Code:    "E_EMAIL_DOMAINPART_INVALID",
+			Message: fmt.Sprintf("email domain ('%v') should not be of a TLD", domainPart),
+		}
 	}
-	for _, currentDomainPart := range domainParts {
-		if strings.ContainsAny(currentDomainPart, specialCharacters) {
-			return errors.New("E_EMAIL_SPECIAL_CHARS")
+	for _, domainPartSubsection := range domainParts {
+		if strings.ContainsAny(domainPartSubsection, specialCharacters) {
+			return &ValidationError{
+				Code:    "E_EMAIL_SPECIAL_CHARS",
+				Message: fmt.Sprintf("email domain part ('%v') should not contain any special characters (%v)", domainPartSubsection, specialCharacters),
+			}
 		}
-		if strings.LastIndexAny(currentDomainPart, invalidStartingAndEndingCharacters) == len(currentDomainPart)-1 {
-			return errors.New("E_EMAIL_INVALID_DOMAINPART_POSTFIX")
+		if strings.LastIndexAny(domainPartSubsection, invalidStartingAndEndingCharacters) == len(domainPartSubsection)-1 {
+			return &ValidationError{
+				Code:    "E_EMAIL_INVALID_DOMAINPART_POSTFIX",
+				Message: fmt.Sprintf("email domain part ('%v') should not end with any of %v", domainPartSubsection, invalidStartingAndEndingCharacters),
+			}
 		}
-		if strings.IndexAny(currentDomainPart, invalidStartingAndEndingCharacters) == 0 {
-			return errors.New("E_EMAIL_INVALID_DOMINPART_PREFIX")
+		if strings.IndexAny(domainPartSubsection, invalidStartingAndEndingCharacters) == 0 {
+			return &ValidationError{
+				Code:    "E_EMAIL_INVALID_DOMINPART_PREFIX",
+				Message: fmt.Sprintf("email domain part ('%v') should not begin with any of %v", domainPartSubsection, invalidStartingAndEndingCharacters),
+			}
 		}
 	}
 	return nil
