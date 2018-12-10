@@ -4,14 +4,21 @@ An accounts microservice for easy addition of a login requirement to your system
 # Scope of Component
 
 ## Version 1.0
-- [ ] Registration of new users using an email address and password
-- [ ] Logging in of existing users via password
-- [ ] Session maintenance of existing users
-- [ ] Logging out of existing users
-- [ ] Updating of existing users' account information
-- [ ] Removal of an existing user from the system
+### 0.0.1
+- [x] Registration of new users using an email address and password
+- [x] Removal of an existing user from the system
 
-See [the Roadmap section](#roadmap) for future developements.
+### 0.0.2
+- [ ] Updating of existing users' account information
+
+### 0.1.0
+- [ ] Logging in of existing users via password
+- [ ] Logging out of existing users
+
+### 0.2.0
+- [ ] Session maintenance of existing users
+
+See [the roadmap section](#roadmap) for future developements.
 
 # Endpoints
 
@@ -19,8 +26,8 @@ See [the Roadmap section](#roadmap) for future developements.
 | --- | --- | --- | --- | --- |
 | POST | /user | Register a new user | 0.0.1 | [#1](//github.com/usvc/accounts/issues/1) |
 | GET | /user/:uuid | Returns the user identified by the :uuid | 0.0.1 | [#2](//github.com/usvc/accounts/issues/2) |
-| PATCH | /user/:uuid | Updates a field of the user identified by :uuid | **TODO** | N/A |
-| PUT | /user/:uuid | Replaces the data of the user identified by :uuid | **TODO** | N/A |
+| PATCH | /user/:uuid | Updates a field of the user identified by :uuid | **TODO** | [#4](//github.com/usvc/accounts/issues/4) |
+| PUT | /user/:uuid | Replaces the data of the user identified by :uuid | **TODO** | [#5](//github.com/usvc/accounts/issues/5) |
 | DELETE | /user/:uuid | Deletes the user identified by the :uuid | 0.0.1 | [#3](//github.com/usvc/accounts/issues/3) |
 | POST | /session | Logs a user in | **TODO** | N/A |
 | DELETE | /session | Logs a user out | **TODO** | N/A |
