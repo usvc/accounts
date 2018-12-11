@@ -28,8 +28,8 @@ var server = Server{}
 func (server *Server) init(opts *ServerOptions) {
 	server.options = opts
 	server.router = http.NewServeMux()
-	userApi := UserAPI{}
-	userApi.Handle(server.router)
+	userAPI := UserAPI{}
+	userAPI.Handle(server.router)
 	server.handle(server.router)
 	server.listen()
 }
