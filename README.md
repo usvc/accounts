@@ -9,6 +9,7 @@ An accounts microservice for easy addition of a login requirement to your system
 - [x] Removal of an existing user from the system
 
 ### 0.0.2
+- [ ] Retrieval of a list of users
 - [ ] Updating of existing users' account information
 
 ### 0.1.0
@@ -24,6 +25,7 @@ See [the roadmap section](#roadmap) for future developements.
 
 | Method | Endpoint | Description | Version | Reference |
 | --- | --- | --- | --- | --- |
+| GET | /user | Retrieves users | 0.0.2 | [#6](//github.com/usvc/accounts/issues/6) |
 | POST | /user | Register a new user | 0.0.1 | [#1](//github.com/usvc/accounts/issues/1) |
 | GET | /user/:uuid | Returns the user identified by the :uuid | 0.0.1 | [#2](//github.com/usvc/accounts/issues/2) |
 | PATCH | /user/:uuid | Updates a field of the user identified by :uuid | **TODO** | [#4](//github.com/usvc/accounts/issues/4) |

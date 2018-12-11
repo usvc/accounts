@@ -2,8 +2,10 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/mux"
 )
@@ -17,6 +19,10 @@ var (
 	UserAPIErrorCreateOk = "E_USER_API_CREATE_OK"
 	// UserAPIErrorCreateGeneric represents a generic user creation error
 	UserAPIErrorCreateGeneric = "E_USER_API_CREATE_GENERIC"
+	// UserAPIErrorQueryOk indicates user querying is okay
+	UserAPIErrorQueryOk = "E_USER_API_QUERY_OK"
+	// UserAPIErrorQueryOk indicates user querying is okay
+	UserAPIErrorQueryInvalidParameters = "E_USER_API_QUERY_INVALID_PARAMETERS"
 	// UserAPIUrlStub is the base stub
 	UserAPIUrlStub = "/user"
 	// UserAPIExtURLStub is the extended stub
@@ -28,10 +34,21 @@ type UserAPI struct {
 	router *mux.Router
 }
 
+type UserAPIError struct {
+	Code    string
+	Message string
+	Data    interface{}
+}
+
+func (userApiError *UserAPIError) Error() string {
+	return fmt.Sprintf("%v:%v", userApiError.Code, userApiError.Message)
+}
+
 // Handle takes in a router and provisions it with the user API
 func (userApi *UserAPI) Handle(router *http.ServeMux) {
 	userApi.router = mux.NewRouter()
 	userApi.handleGetUserByUUID(userApi.router)
+	userApi.handleQueryUsers(userApi.router)
 	userApi.handleCreateUser(userApi.router)
 	userApi.handleDeleteUserByUUID(userApi.router)
 	router.Handle(UserAPIUrlStub, userApi.router)
@@ -40,75 +57,95 @@ func (userApi *UserAPI) Handle(router *http.ServeMux) {
 
 var userApi = UserAPI{}
 
-func (userApi *UserAPI) handleDeleteUserByUUID(router *mux.Router) {
-	router.HandleFunc(
-		UserAPIUrlStub+"/{uuid}",
-		func(w http.ResponseWriter, r *http.Request) {
-			vars := mux.Vars(r)
-			user.DeleteByUUID(db.Get(), vars["uuid"])
-			response := Response{
-				UserAPIErrorDeleteOK,
-				"ok",
-				map[string]interface{}{"uuid": vars["uuid"]},
+func (userApi *UserAPI) handleQueryUsers(router *mux.Router) {
+	router.Handle(
+		UserAPIUrlStub,
+		APIHandler(func(w http.ResponseWriter, r *http.Request) {
+			query := r.URL.Query()
+			startIndex := 0
+			dataLimit := 10
+			if len(query["start_at"]) > 0 {
+				_startIndex, err := strconv.Atoi(query["start_at"][0])
+				if err != nil {
+					panic(&UserAPIError{
+						Code:    UserAPIErrorQueryInvalidParameters,
+						Message: err.Error(),
+						Data:    query["start_at"][0],
+					})
+				} else if _startIndex > 0 {
+					startIndex = _startIndex
+				}
+			}
+			if len(query["limit"]) > 0 {
+				_dataLimit, err := strconv.Atoi(query["limit"][0])
+				if err != nil {
+					panic(&UserAPIError{
+						Code:    UserAPIErrorQueryInvalidParameters,
+						Message: err.Error(),
+						Data:    query["limit"][0],
+					})
+				} else if _dataLimit > 0 {
+					dataLimit = _dataLimit
+				}
+			}
+			data := user.Query(db.Get(), uint(startIndex), uint(dataLimit))
+			response := APIResponse{
+				Code:    UserAPIErrorQueryOk,
+				Message: "ok",
+				Data:    data,
 			}
 			response.send(w)
-		},
+		}),
+	).Methods("GET")
+}
+
+func (userApi *UserAPI) handleDeleteUserByUUID(router *mux.Router) {
+	router.Handle(
+		UserAPIUrlStub+"/{uuid}",
+		APIHandler(func(w http.ResponseWriter, r *http.Request) {
+			params := mux.Vars(r)
+			user.DeleteByUUID(db.Get(), params["uuid"])
+			response := APIResponse{
+				Code:    UserAPIErrorDeleteOK,
+				Message: "ok",
+				Data:    map[string]interface{}{"uuid": params["uuid"]},
+			}
+			response.send(w)
+		}),
 	).Methods("DELETE")
 }
 
 func (userApi *UserAPI) handleGetUserByUUID(router *mux.Router) {
-	router.HandleFunc(
+	router.Handle(
 		UserAPIUrlStub+"/{uuid}",
-		func(w http.ResponseWriter, r *http.Request) {
+		APIHandler(func(w http.ResponseWriter, r *http.Request) {
 			vars := mux.Vars(r)
 			data := user.GetByUUID(db.Get(), vars["uuid"])
-			response := Response{
-				UserAPIErrorOK,
-				"ok",
-				data,
+			response := APIResponse{
+				Code:    UserAPIErrorOK,
+				Message: "ok",
+				Data:    data,
 			}
 			response.send(w)
-		},
+		}),
 	).Methods("GET")
 }
 
 func (userApi *UserAPI) handleCreateUser(router *mux.Router) {
-	router.HandleFunc(
+	router.Handle(
 		UserAPIUrlStub,
-		func(w http.ResponseWriter, r *http.Request) {
-			defer func() {
-				if r := recover(); r != nil {
-					var response Response
-					switch t := r.(type) {
-					case *UserError:
-						w.WriteHeader(400)
-						response = Response{
-							t.Code,
-							t.Message,
-							t.Data,
-						}
-					default:
-						w.WriteHeader(500)
-						response = Response{
-							UserAPIErrorCreateGeneric,
-							"",
-							r,
-						}
-					}
-					response.send(w)
-				}
-			}()
+		APIHandler(func(w http.ResponseWriter, r *http.Request) {
 			var newUser UserNew
 			body, _ := ioutil.ReadAll(r.Body)
 			json.Unmarshal(body, &newUser)
 			data := user.Create(db.Get(), newUser)
 
-			response := Response{
-				UserAPIErrorCreateOk,
-				"ok",
-				data,
+			response := APIResponse{
+				Code:    UserAPIErrorCreateOk,
+				Message: "ok",
+				Data:    data,
 			}
 			response.send(w)
-		},
+		}),
 	).Methods("POST")
 }

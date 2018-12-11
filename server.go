@@ -6,18 +6,21 @@ import (
 	"strconv"
 )
 
+// Server class to hold the server
 type Server struct {
 	options *ServerOptions
 	router  *http.ServeMux
 }
 
+// ServerOptions to initialize the server with
 type ServerOptions struct {
 	Port      string
 	Interface string
 }
 
 var (
-	ServerErrorOkay = "E_SERVER_OK"
+	// ServerErrorOK to indicate all is well
+	ServerErrorOK = "E_SERVER_OK"
 )
 
 var server = Server{}
@@ -54,10 +57,10 @@ func (server *Server) prelisten() {
 
 func (server *Server) handle(router *http.ServeMux) {
 	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		response := Response{
-			ErrorCode: ServerErrorOkay,
-			Message:   "ok",
-			Data:      "ok",
+		response := APIResponse{
+			Code:    ServerErrorOK,
+			Message: "ok",
+			Data:    "ok",
 		}
 		response.send(w)
 	})

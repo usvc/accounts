@@ -11,6 +11,7 @@ import (
 	_ "github.com/golang-migrate/migrate/source/file"
 )
 
+// Migrator class for migrating data schemas
 type Migrator struct {
 	db       *sql.DB
 	driver   database.Driver
@@ -18,6 +19,7 @@ type Migrator struct {
 	options  *MigratorConnectionOptions
 }
 
+// MigratorConnectionOptions for initializing the migrator
 type MigratorConnectionOptions struct {
 	Host     string
 	Port     string
@@ -102,10 +104,9 @@ func (migrator *Migrator) migrateUpwards() bool {
 		if err.Error() == "file does not exist" {
 			logger.Infof("[migrator] migration is up-to-date at version: %v (dirty: %v)", version, dirty)
 			return true
-		} else {
-			logger.Errorf("[migrator] migration upward failed with error: %s", err)
-			panic(err)
 		}
+		logger.Errorf("[migrator] migration upward failed with error: %s", err)
+		panic(err)
 	} else if version, dirty, err = migrator.instance.Version(); err != nil {
 		logger.Error(err)
 	} else {

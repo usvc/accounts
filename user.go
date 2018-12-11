@@ -154,6 +154,39 @@ USER QUERY
 -------------------------------------------------------------------------------
 */
 
+func (user *User) Query(database *sql.DB, startIndex uint, limit uint) *[]User {
+	logger.Infof("[user] querying %v users starting from index %v...", limit, startIndex)
+	stmt, err := database.Prepare("SELECT uuid, email, username, date_created, last_modified FROM accounts LIMIT ?,?")
+	if err != nil {
+		panic(err)
+	}
+	var users []User
+	rows, err := stmt.Query(startIndex, limit)
+	defer rows.Close()
+	if err != nil {
+		panic(err)
+	}
+	for rows.Next() {
+		var uuid sql.NullString
+		var email sql.NullString
+		var username sql.NullString
+		var dateCreated sql.NullString
+		var lastModified sql.NullString
+		err := rows.Scan(&uuid, &email, &username, &dateCreated, &lastModified)
+		if err != nil {
+			panic(err)
+		}
+		users = append(users, User{
+			Uuid:         uuid.String,
+			Email:        email.String,
+			Username:     username.String,
+			DateCreated:  dateCreated.String,
+			LastModified: lastModified.String,
+		})
+	}
+	return &users
+}
+
 // GetByUUID retrieves a user with UUID :uuid
 func (user *User) GetByUUID(database *sql.DB, uuid string) *User {
 	if len(uuid) == 0 {
@@ -175,6 +208,7 @@ func (*User) getByUUID(database *sql.DB, uuid string) *User {
 	}
 	row := stmt.QueryRow(uuid)
 	if err != nil {
+		logger.Errorf("[user] %v", err)
 		panic(err)
 	}
 	var email sql.NullString
@@ -183,7 +217,14 @@ func (*User) getByUUID(database *sql.DB, uuid string) *User {
 	var lastModified sql.NullString
 	err = row.Scan(&email, &username, &dateCreated, &lastModified)
 	if err != nil {
-		panic(err)
+		if err == sql.ErrNoRows {
+			panic(&UserError{
+				Code:    UserErrorNotFound,
+				Message: fmt.Sprintf("the user identified by %s does not exist", uuid),
+			})
+		} else {
+			panic(err)
+		}
 	}
 	return &User{
 		Uuid:         uuid,
