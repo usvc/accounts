@@ -25,7 +25,8 @@ var server = Server{}
 func (server *Server) init(opts *ServerOptions) {
 	server.options = opts
 	server.router = http.NewServeMux()
-	userApi.handle(server.router)
+	userApi = UserAPI{}
+	userApi.Handle(server.router)
 	server.handle(server.router)
 	server.listen()
 }
@@ -33,8 +34,8 @@ func (server *Server) init(opts *ServerOptions) {
 func (server *Server) listen() {
 	server.prelisten()
 	bindingInterface := fmt.Sprintf("%v:%v", server.options.Interface, server.options.Port)
-	logger.infof("[server] listening on %v", bindingInterface)
-	logger.error(http.ListenAndServe(bindingInterface, server.router))
+	logger.Infof("[server] listening on %v", bindingInterface)
+	logger.Error(http.ListenAndServe(bindingInterface, server.router))
 }
 
 func (server *Server) prelisten() {

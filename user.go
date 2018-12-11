@@ -30,7 +30,7 @@ type UserError struct {
 	Data    interface{}
 }
 
-// Error implementation
+// Error implementation for UserError
 func (userError *UserError) Error() string {
 	return fmt.Sprintf("%v:%v", userError.Code, userError.Message)
 }
@@ -81,7 +81,7 @@ func (user *User) Create(database *sql.DB, newUser UserNew) *User {
 
 	userRow := user.create(database, &newUser)
 
-	logger.infof("[user] created user '%s'", userRow.Uuid)
+	logger.Infof("[user] created user '%s'", userRow.Uuid)
 
 	return userRow
 }
@@ -102,14 +102,14 @@ func (*User) create(database *sql.DB, newUser *UserNew) *User {
 // createAccount adds a new row to the `accounts` table, returns the ID of the
 // newly created user
 func (*User) createAccount(database *sql.DB, email string) int64 {
-	logger.info("[user] adding account data...")
+	logger.Info("[user] adding account data...")
 	stmt, err := database.Prepare("INSERT INTO accounts (email) VALUES (?)")
 	if err != nil {
 		panic(err)
 	}
 	output, err := stmt.Exec(email)
 	if err != nil {
-		logger.errorf("[user] %v", err)
+		logger.Errorf("[user] %v", err)
 		switch err.(*mysql.MySQLError).Number {
 		case 1062:
 			panic(&UserError{
@@ -130,7 +130,7 @@ func (*User) createAccount(database *sql.DB, email string) int64 {
 
 // createSecurity adds the security details of the user with ID :id
 func (*User) createSecurity(database *sql.DB, id int64, passwordHash string) {
-	logger.info("[user] adding account security...")
+	logger.Info("[user] adding account security...")
 	stmt, err := database.Prepare("INSERT INTO security (account_id, password) VALUES (?, ?)")
 	if err != nil {
 		panic(err)
@@ -242,7 +242,7 @@ func (user *User) DeleteByUUID(database *sql.DB, uuid string) {
 
 	user.deleteByUUID(database, uuid)
 
-	logger.infof("[user] deleted user '%s'", uuid)
+	logger.Infof("[user] deleted user '%s'", uuid)
 }
 
 // deleteByUUID defines the database operations for removing a user identified

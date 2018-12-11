@@ -24,70 +24,70 @@ func (*Logger) init(environment string) {
 }
 
 // Debug logs a 'debug' level message
-func (*Logger) debug(args ...interface{}) {
+func (*Logger) Debug(args ...interface{}) {
 	logrus.Debug(args...)
 }
 
 // Debugf logs a 'debug' level message with parameters
-func (*Logger) debugf(message string, args ...interface{}) {
+func (*Logger) Debugf(message string, args ...interface{}) {
 	logrus.Debugf(message, args...)
 }
 
-func (*Logger) trace(args ...interface{}) {
+func (*Logger) Trace(args ...interface{}) {
 	logrus.Trace(args...)
 }
 
-func (*Logger) tracef(message string, args ...interface{}) {
+func (*Logger) Tracef(message string, args ...interface{}) {
 	logrus.Tracef(message, args...)
 }
 
-func (*Logger) info(args ...interface{}) {
+func (*Logger) Info(args ...interface{}) {
 	logrus.Info(args...)
 }
 
-func (*Logger) infof(message string, args ...interface{}) {
+func (*Logger) Infof(message string, args ...interface{}) {
 	logrus.Infof(message, args...)
 }
 
-func (*Logger) warn(args ...interface{}) {
+func (*Logger) Warn(args ...interface{}) {
 	logrus.Warn(args...)
 }
 
-func (*Logger) warnf(message string, args ...interface{}) {
+func (*Logger) Warnf(message string, args ...interface{}) {
 	logrus.Warnf(message, args...)
 }
 
-func (*Logger) error(args ...interface{}) {
+func (*Logger) Error(args ...interface{}) {
 	logrus.Error(args...)
 }
 
-func (*Logger) errorf(message string, args ...interface{}) {
+func (*Logger) Errorf(message string, args ...interface{}) {
 	logrus.Errorf(message, args...)
 }
 
-func (*Logger) panic(args ...interface{}) {
+func (*Logger) Panic(args ...interface{}) {
 	logrus.Panic(args...)
 }
 
-func (*Logger) panicf(message string, args ...interface{}) {
+func (*Logger) Panicf(message string, args ...interface{}) {
 	logrus.Panicf(message, args...)
 }
 
-func (*Logger) fatal(args ...interface{}) {
+func (*Logger) Fatal(args ...interface{}) {
 	logrus.Fatal(args...)
 }
 
-func (*Logger) fatalf(message string, args ...interface{}) {
+func (*Logger) Fatalf(message string, args ...interface{}) {
 	logrus.Fatalf(message, args...)
 }
 
-func (*Logger) withStack(args ...interface{}) {
+func (*Logger) WithStack(args ...interface{}) {
 	logrus.WithFields(logrus.Fields{
 		"stack": strings.Split(string(debug.Stack()), "\n"),
 	}).Error(args...)
 }
 
-func (*Logger) withStackf(message string, args ...interface{}) {
+func (*Logger) WithStackf(message string, args ...interface{}) {
 	logrus.WithFields(logrus.Fields{
 		"stack": strings.Split(string(debug.Stack()), "\n"),
 	}).Errorf(message, args...)

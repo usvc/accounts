@@ -16,14 +16,14 @@ const applicationStartImage = `
 func main() {
 	defer func() {
 		if r := recover(); r != nil {
-			logger.withStackf("%s", r)
+			logger.WithStackf("%s", r)
 		}
 	}()
 	fmt.Println(applicationStartImage)
 	logger.init(config.Environment)
-	logger.info("[main] initialising configurations...")
+	logger.Info("[main] initialising configurations...")
 	config.Init()
-	logger.info("[main] initialising database connection...")
+	logger.Info("[main] initialising database connection...")
 	db.Init(&DatabaseConnectionOptions{
 		Host:                      config.DatabaseHost,
 		Port:                      config.DatabasePort,
@@ -33,9 +33,9 @@ func main() {
 		ConnectionRetryAttempts:   3,
 		ConnectionRetryIntervalMs: 5000,
 	})
-	logger.infof("[main] usvc/accounts started in %s environment at %s", strings.ToUpper(config.Environment), time.Now().Format(time.RFC1123Z))
+	logger.Infof("[main] usvc/accounts started in %s environment at %s", strings.ToUpper(config.Environment), time.Now().Format(time.RFC1123Z))
 	if config.IsMigration {
-		logger.info("[main] performing migration...")
+		logger.Info("[main] performing migration...")
 		migrator.run(&MigratorConnectionOptions{
 			Host:     config.DatabaseHost,
 			Port:     config.DatabasePort,
@@ -44,7 +44,7 @@ func main() {
 			Password: config.DatabasePassword,
 		})
 	} else {
-		logger.info("[main] starting server...")
+		logger.Info("[main] starting server...")
 		server.init(&ServerOptions{
 			Interface: config.Interface,
 			Port:      config.Port,

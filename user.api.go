@@ -8,37 +8,46 @@ import (
 	"github.com/gorilla/mux"
 )
 
-var UserApiErrorOK = "E_USER_API_OK"
-var UserApiErrorDeleteOK = "E_USER_API_ERROR_DELETE_OK"
-var UserApiErrorInvalidParameters = "E_USER_API_INVALID_PARAMS"
-var UserApiErrorCreateOk = "E_USER_API_CREATE_OK"
-var UserApiErrorCreateGeneric = "E_USER_API_CREATE_GENERIC"
-var UserApiUrlStub = "/user"
-var UserApiExtUrlStub = "/user/"
+var (
+	// UserAPIErrorOK indicates its all okay
+	UserAPIErrorOK = "E_USER_API_OK"
+	// UserAPIErrorDeleteOK indicates deletion is okay
+	UserAPIErrorDeleteOK = "E_USER_API_ERROR_DELETE_OK"
+	// UserAPIErrorCreateOk indicates user creation is okay
+	UserAPIErrorCreateOk = "E_USER_API_CREATE_OK"
+	// UserAPIErrorCreateGeneric represents a generic user creation error
+	UserAPIErrorCreateGeneric = "E_USER_API_CREATE_GENERIC"
+	// UserAPIUrlStub is the base stub
+	UserAPIUrlStub = "/user"
+	// UserAPIExtURLStub is the extended stub
+	UserAPIExtURLStub = "/user/"
+)
 
+// UserAPI is the controller layer
 type UserAPI struct {
 	router *mux.Router
 }
 
-func (userApi *UserAPI) handle(router *http.ServeMux) {
+// Handle takes in a router and provisions it with the user API
+func (userApi *UserAPI) Handle(router *http.ServeMux) {
 	userApi.router = mux.NewRouter()
-	UserAPIGetUserByUuid(userApi.router)
-	UserAPICreateUser(userApi.router)
-	UserAPIDeleteUserByUuid(userApi.router)
-	router.Handle(UserApiUrlStub, userApi.router)
-	router.Handle(UserApiExtUrlStub, userApi.router)
+	userApi.handleGetUserByUUID(userApi.router)
+	userApi.handleCreateUser(userApi.router)
+	userApi.handleDeleteUserByUUID(userApi.router)
+	router.Handle(UserAPIUrlStub, userApi.router)
+	router.Handle(UserAPIExtURLStub, userApi.router)
 }
 
 var userApi = UserAPI{}
 
-func UserAPIDeleteUserByUuid(router *mux.Router) {
+func (userApi *UserAPI) handleDeleteUserByUUID(router *mux.Router) {
 	router.HandleFunc(
-		UserApiUrlStub+"/{uuid}",
+		UserAPIUrlStub+"/{uuid}",
 		func(w http.ResponseWriter, r *http.Request) {
 			vars := mux.Vars(r)
 			user.DeleteByUUID(db.Get(), vars["uuid"])
 			response := Response{
-				UserApiErrorDeleteOK,
+				UserAPIErrorDeleteOK,
 				"ok",
 				map[string]interface{}{"uuid": vars["uuid"]},
 			}
@@ -47,14 +56,14 @@ func UserAPIDeleteUserByUuid(router *mux.Router) {
 	).Methods("DELETE")
 }
 
-func UserAPIGetUserByUuid(router *mux.Router) {
+func (userApi *UserAPI) handleGetUserByUUID(router *mux.Router) {
 	router.HandleFunc(
-		UserApiUrlStub+"/{uuid}",
+		UserAPIUrlStub+"/{uuid}",
 		func(w http.ResponseWriter, r *http.Request) {
 			vars := mux.Vars(r)
 			data := user.GetByUUID(db.Get(), vars["uuid"])
 			response := Response{
-				UserApiErrorOK,
+				UserAPIErrorOK,
 				"ok",
 				data,
 			}
@@ -63,9 +72,9 @@ func UserAPIGetUserByUuid(router *mux.Router) {
 	).Methods("GET")
 }
 
-func UserAPICreateUser(router *mux.Router) {
+func (userApi *UserAPI) handleCreateUser(router *mux.Router) {
 	router.HandleFunc(
-		UserApiUrlStub,
+		UserAPIUrlStub,
 		func(w http.ResponseWriter, r *http.Request) {
 			defer func() {
 				if r := recover(); r != nil {
@@ -81,7 +90,7 @@ func UserAPICreateUser(router *mux.Router) {
 					default:
 						w.WriteHeader(500)
 						response = Response{
-							UserApiErrorCreateGeneric,
+							UserAPIErrorCreateGeneric,
 							"",
 							r,
 						}
@@ -95,7 +104,7 @@ func UserAPICreateUser(router *mux.Router) {
 			data := user.Create(db.Get(), newUser)
 
 			response := Response{
-				UserApiErrorCreateOk,
+				UserAPIErrorCreateOk,
 				"ok",
 				data,
 			}

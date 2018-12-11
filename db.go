@@ -37,7 +37,7 @@ func (database *Database) Get() *sql.DB {
 }
 
 func (database *Database) createConnection() {
-	logger.infof("[db] creating connection with '%s:%s' using user '%s'...", database.options.Host, database.options.Port, database.options.User)
+	logger.Infof("[db] creating connection with '%s:%s' using user '%s'...", database.options.Host, database.options.Port, database.options.User)
 	instance, err := sql.Open("mysql", fmt.Sprintf("%v:%v@tcp(%v:%v)/%v",
 		database.options.User,
 		database.options.Password,
@@ -55,13 +55,13 @@ func (database *Database) validateConnection() {
 	err := errors.New("uninitialised")
 	var connectionAttempt uint
 	for connectionAttempt = 1; err != nil && connectionAttempt <= database.options.ConnectionRetryAttempts; connectionAttempt++ {
-		logger.infof("[db] pinging database (%v/%v attempts) to validate connection...", connectionAttempt, database.options.ConnectionRetryAttempts)
+		logger.Infof("[db] pinging database (%v/%v attempts) to validate connection...", connectionAttempt, database.options.ConnectionRetryAttempts)
 		err = database.inst.Ping()
 		if err != nil {
-			logger.infof("[db] database ping failed, waiting %v milliseconds before trying again...", database.options.ConnectionRetryIntervalMs)
+			logger.Infof("[db] database ping failed, waiting %v milliseconds before trying again...", database.options.ConnectionRetryIntervalMs)
 			time.Sleep(database.options.ConnectionRetryIntervalMs * time.Millisecond)
 		} else {
-			logger.info("[db] ping succeeded, proceeding...")
+			logger.Info("[db] ping succeeded, proceeding...")
 		}
 	}
 	if err != nil {
