@@ -21,7 +21,7 @@ var (
 	UserAPIErrorCreateGeneric = "E_USER_API_CREATE_GENERIC"
 	// UserAPIErrorQueryOk indicates user querying is okay
 	UserAPIErrorQueryOk = "E_USER_API_QUERY_OK"
-	// UserAPIErrorQueryOk indicates user querying is okay
+	// UserAPIErrorQueryInvalidParameters indicates user querying is okay
 	UserAPIErrorQueryInvalidParameters = "E_USER_API_QUERY_INVALID_PARAMETERS"
 	// UserAPIUrlStub is the base stub
 	UserAPIUrlStub = "/user"
@@ -34,6 +34,7 @@ type UserAPI struct {
 	router *mux.Router
 }
 
+// UserAPIError is the standardised error for this module
 type UserAPIError struct {
 	Code    string
 	Message string
