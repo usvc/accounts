@@ -35,12 +35,20 @@ func (userError *UserError) Error() string {
 	return fmt.Sprintf("%v:%v", userError.Code, userError.Message)
 }
 
-var UserErrorNotFound = "E_USER_NOT_FOUND"
-var UserErrorCreateDuplicateEntry = "E_USER_CREATE_DUPLICATE"
-var UserErrorCreateGeneric = "E_USER_CREATE_GENERIC"
-var UserErrorCreateMissingParameters = "E_USER_CREATE_MISSING_PARAMS"
-var UserErrorCreateInvalidEmail = "E_USER_CREATE_INVALID_EMAIL"
-var UserErrorCreateInvalidPassword = "E_USER_CREATE_INVALID_PASSWORD"
+var (
+	// UserErrorNotFound for errors where user is not found
+	UserErrorNotFound = "E_USER_NOT_FOUND"
+	// UserErrorCreateGeneric for generic user creation errors
+	UserErrorCreateGeneric = "E_USER_CREATE_GENERIC"
+	// UserErrorCreateDuplicateEntry for errors where a duplicate user is found
+	UserErrorCreateDuplicateEntry = "E_USER_CREATE_DUPLICATE"
+	// UserErrorCreateMissingParameters for missing parameters
+	UserErrorCreateMissingParameters = "E_USER_CREATE_MISSING_PARAMS"
+	// UserErrorCreateInvalidEmail for invalid emails
+	UserErrorCreateInvalidEmail = "E_USER_CREATE_INVALID_EMAIL"
+	// UserErrorCreateInvalidPassword for invalid passwords
+	UserErrorCreateInvalidPassword = "E_USER_CREATE_INVALID_PASSWORD"
+)
 
 var userStatementsPrepared = false
 
@@ -54,6 +62,8 @@ USER CREATION
 */
 
 func (user *User) Create(database *sql.DB, newUser UserNew) *User {
+	logger.Infof("[user] creating user with email '%s'", newUser.Email)
+
 	// validate parameters
 	if len(newUser.Email) == 0 {
 		panic(&UserError{
@@ -81,7 +91,7 @@ func (user *User) Create(database *sql.DB, newUser UserNew) *User {
 
 	userRow := user.create(database, &newUser)
 
-	logger.Infof("[user] created user '%s'", userRow.Uuid)
+	logger.Infof("[user] created user with email '%s' - uuid is '%s'", newUser.Email, userRow.Uuid)
 
 	return userRow
 }
@@ -184,11 +194,14 @@ func (user *User) Query(database *sql.DB, startIndex uint, limit uint) *[]User {
 			LastModified: lastModified.String,
 		})
 	}
+	logger.Infof("[user] queried %v users (requested for %v)", len(users), limit)
 	return &users
 }
 
 // GetByUUID retrieves a user with UUID :uuid
 func (user *User) GetByUUID(database *sql.DB, uuid string) *User {
+	logger.Infof("[user] getting user with UUID '%v'", uuid)
+
 	if len(uuid) == 0 {
 		panic(&UserError{
 			Code:    UserErrorCreateMissingParameters,
@@ -197,6 +210,9 @@ func (user *User) GetByUUID(database *sql.DB, uuid string) *User {
 	}
 
 	userRow := user.getByUUID(database, uuid)
+
+	logger.Infof("[user] retrieved user with UUID '%v'", uuid)
+
 	return userRow
 }
 
@@ -274,6 +290,8 @@ USER REMOVAL
 // DeleteByUUID removes the user identified by :uuid using the database
 // connection :database
 func (user *User) DeleteByUUID(database *sql.DB, uuid string) {
+	logger.Infof("[user] removing user with UUID '%v'", uuid)
+
 	if len(uuid) == 0 {
 		panic(&UserError{
 			Code:    UserErrorCreateMissingParameters,
@@ -283,7 +301,7 @@ func (user *User) DeleteByUUID(database *sql.DB, uuid string) {
 
 	user.deleteByUUID(database, uuid)
 
-	logger.Infof("[user] deleted user '%s'", uuid)
+	logger.Infof("[user] removed user with UUID '%v'", uuid)
 }
 
 // deleteByUUID defines the database operations for removing a user identified

@@ -41,7 +41,7 @@ type UserAPIError struct {
 }
 
 func (userApiError *UserAPIError) Error() string {
-	return fmt.Sprintf("%v:%v", userApiError.Code, userApiError.Message)
+	return fmt.Sprintf("[user.api] %v:%v", userApiError.Code, userApiError.Message)
 }
 
 // Handle takes in a router and provisions it with the user API
