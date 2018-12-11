@@ -9,7 +9,7 @@ An accounts microservice for easy addition of a login requirement to your system
 - [x] Removal of an existing user from the system
 
 ### 0.0.2
-- [ ] Retrieval of a list of users
+- [x] Retrieval of a list of users
 - [ ] Updating of existing users' account information
 
 ### 0.1.0
