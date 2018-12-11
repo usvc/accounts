@@ -10,6 +10,8 @@ An accounts microservice for easy addition of a login requirement to your system
 
 ### 0.0.2
 - [x] Retrieval of a list of users
+
+### 0.0.3
 - [ ] Updating of existing users' account information
 
 ### 0.1.0
@@ -28,8 +30,7 @@ See [the roadmap section](#roadmap) for future developements.
 | GET | /user | Retrieves users | 0.0.2 | [#6](//github.com/usvc/accounts/issues/6) |
 | POST | /user | Register a new user | 0.0.1 | [#1](//github.com/usvc/accounts/issues/1) |
 | GET | /user/:uuid | Returns the user identified by the :uuid | 0.0.1 | [#2](//github.com/usvc/accounts/issues/2) |
-| PATCH | /user/:uuid | Updates a field of the user identified by :uuid | **TODO** | [#4](//github.com/usvc/accounts/issues/4) |
-| PUT | /user/:uuid | Replaces the data of the user identified by :uuid | **TODO** | [#5](//github.com/usvc/accounts/issues/5) |
+| PATCH | /user/:uuid | Updates a field of the user identified by :uuid | 0.0.3 | [#4](//github.com/usvc/accounts/issues/4) |
 | DELETE | /user/:uuid | Deletes the user identified by the :uuid | 0.0.1 | [#3](//github.com/usvc/accounts/issues/3) |
 | POST | /session | Logs a user in | **TODO** | N/A |
 | DELETE | /session | Logs a user out | **TODO** | N/A |
