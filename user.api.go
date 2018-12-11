@@ -55,8 +55,6 @@ func (userApi *UserAPI) Handle(router *http.ServeMux) {
 	router.Handle(UserAPIExtURLStub, userApi.router)
 }
 
-var userApi = UserAPI{}
-
 func (userApi *UserAPI) handleQueryUsers(router *mux.Router) {
 	router.Handle(
 		UserAPIUrlStub,
