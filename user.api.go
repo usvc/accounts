@@ -36,7 +36,7 @@ func UserAPIDeleteUserByUuid(router *mux.Router) {
 		UserApiUrlStub+"/{uuid}",
 		func(w http.ResponseWriter, r *http.Request) {
 			vars := mux.Vars(r)
-			user.DeleteByUuid(vars["uuid"])
+			user.DeleteByUUID(db.Get(), vars["uuid"])
 			response := Response{
 				UserApiErrorDeleteOK,
 				"ok",
@@ -52,7 +52,7 @@ func UserAPIGetUserByUuid(router *mux.Router) {
 		UserApiUrlStub+"/{uuid}",
 		func(w http.ResponseWriter, r *http.Request) {
 			vars := mux.Vars(r)
-			data := user.GetByUuid(vars["uuid"])
+			data := user.GetByUUID(db.Get(), vars["uuid"])
 			response := Response{
 				UserApiErrorOK,
 				"ok",
@@ -92,7 +92,7 @@ func UserAPICreateUser(router *mux.Router) {
 			var newUser UserNew
 			body, _ := ioutil.ReadAll(r.Body)
 			json.Unmarshal(body, &newUser)
-			data := user.Create(newUser)
+			data := user.Create(db.Get(), newUser)
 
 			response := Response{
 				UserApiErrorCreateOk,
