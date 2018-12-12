@@ -12,7 +12,10 @@ An accounts microservice for easy addition of a login requirement to your system
 - [x] Retrieval of a list of users
 
 ### 0.0.3
-- [ ] Updating of existing users' account information
+- [x] Updating of existing users' account information
+
+### 0.0.4
+- [ ] Updating of existing users' password
 
 ### 0.1.0
 - [ ] Logging in of existing users via password
@@ -38,7 +41,7 @@ See [the roadmap section](#roadmap) for future developements.
 | GET | /healthz | Returns 200 OK if healthy | **TODO** | N/A |
 | GET | /readyz | Returns 200 OK if ready to accept connections | **TODO** | N/A |
 
-> Refer to [user.api.go](./user.api.go) for details on the user endpoints.  
+> Refer to [the User documentation](./docs/User.md) for details on the user endpoints.  
 > Refer to [session.api.go](./session.api.go) for details on the session endpoints.
 
 # Configuration

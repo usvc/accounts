@@ -14,15 +14,19 @@ var (
 	// UserAPIErrorOK indicates its all okay
 	UserAPIErrorOK = "E_USER_API_OK"
 	// UserAPIErrorDeleteOK indicates deletion is okay
-	UserAPIErrorDeleteOK = "E_USER_API_ERROR_DELETE_OK"
+	UserAPIErrorDeleteOK = "E_USER_API_DELETE_OK"
 	// UserAPIErrorCreateOk indicates user creation is okay
 	UserAPIErrorCreateOk = "E_USER_API_CREATE_OK"
 	// UserAPIErrorCreateGeneric represents a generic user creation error
 	UserAPIErrorCreateGeneric = "E_USER_API_CREATE_GENERIC"
+	// UserAPIErrorGetOK indicates getting a single user is okay
+	UserAPIErrorGetOK = "E_USER_API_GET_OK"
 	// UserAPIErrorQueryOk indicates user querying is okay
 	UserAPIErrorQueryOk = "E_USER_API_QUERY_OK"
 	// UserAPIErrorQueryInvalidParameters indicates user querying is okay
 	UserAPIErrorQueryInvalidParameters = "E_USER_API_QUERY_INVALID_PARAMETERS"
+	// UserAPIErrorUpateOk indicates user updating is okay
+	UserAPIErrorUpateOk = "E_USER_API_UPDATE_OK"
 	// UserAPIUrlStub is the base stub
 	UserAPIUrlStub = "/user"
 	// UserAPIExtURLStub is the extended stub
@@ -52,8 +56,29 @@ func (userApi *UserAPI) Handle(router *http.ServeMux) {
 	userApi.handleQueryUsers(userApi.router)
 	userApi.handleCreateUser(userApi.router)
 	userApi.handleDeleteUserByUUID(userApi.router)
+	userApi.handleUpdateUser(userApi.router)
 	router.Handle(UserAPIUrlStub, userApi.router)
 	router.Handle(UserAPIExtURLStub, userApi.router)
+}
+
+func (userApi *UserAPI) handleUpdateUser(router *mux.Router) {
+	router.Handle(
+		UserAPIExtURLStub+"{uuid}",
+		APIHandler(func(w http.ResponseWriter, r *http.Request) {
+			params := mux.Vars(r)
+			var userData User
+			body, _ := ioutil.ReadAll(r.Body)
+			json.Unmarshal(body, &userData)
+			userData.Uuid = params["uuid"]
+			user.UpdateByUUID(db.Get(), &userData)
+			response := APIResponse{
+				Code:    UserAPIErrorUpateOk,
+				Message: "",
+				Data:    userData,
+			}
+			response.send(w)
+		}),
+	).Methods("PATCH")
 }
 
 func (userApi *UserAPI) handleQueryUsers(router *mux.Router) {
@@ -121,7 +146,7 @@ func (userApi *UserAPI) handleGetUserByUUID(router *mux.Router) {
 			vars := mux.Vars(r)
 			data := user.GetByUUID(db.Get(), vars["uuid"])
 			response := APIResponse{
-				Code:    UserAPIErrorOK,
+				Code:    UserAPIErrorGetOK,
 				Message: "ok",
 				Data:    data,
 			}

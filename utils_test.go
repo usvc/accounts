@@ -108,9 +108,11 @@ func TestValidateEmailInvalidCases(t *testing.T) {
 	}
 }
 
-func TestValidatePasswordValidLength(t *testing.T) {
+func TestValidateValidPassword(t *testing.T) {
 	validPasswords := []string{
 		"abcdef1!",
+		"abc1!def",
+		"1!abcdef",
 	}
 	var failedPasswords []string
 	for _, validPassword := range validPasswords {
@@ -123,9 +125,14 @@ func TestValidatePasswordValidLength(t *testing.T) {
 	}
 }
 
-func TestValidatePasswordInvalidLength(t *testing.T) {
+func TestValidateInvalidPassword(t *testing.T) {
 	invalidPasswords := []string{
 		"abcde1!",
+		"abcdefgh",
+		"abcdefg1",
+		"abcde111",
+		"abcdefg!",
+		"abcde!!!",
 	}
 	var failedPasswords []string
 	for _, invalidPassword := range invalidPasswords {
@@ -138,10 +145,44 @@ func TestValidatePasswordInvalidLength(t *testing.T) {
 	}
 }
 
-func TestValidatePasswordCharacters(t *testing.T) {
-
+func TestValidateValidUsernames(t *testing.T) {
+	validUsernames := []string{
+		"1234",
+		"abcd",
+		"ab-cd",
+		"ab_cd",
+		"ab.cd",
+		"abcdef12.3",
+		"1.23abcdef",
+	}
+	var failedUsernames []string
+	for _, validUsername := range validUsernames {
+		if err := utils.ValidateUsername(validUsername); err != nil {
+			failedUsernames = append(failedUsernames, validUsername)
+		}
+	}
+	if len(failedUsernames) > 0 {
+		t.Errorf("valid usernames marked as invalid: %v", failedUsernames)
+	}
 }
 
-func TestValidatePasswordCases(t *testing.T) {
-
+func TestValidateInvalidUsernames(t *testing.T) {
+	invalidUsernames := []string{
+		"abc",
+		".abc",
+		"abc.",
+		"_abc",
+		"abc_",
+		"-abc",
+		"abc-",
+	}
+	var failedUsernames []string
+	for _, invalidUsername := range invalidUsernames {
+		if err := utils.ValidateUsername(invalidUsername); err == nil {
+			failedUsernames = append(failedUsernames, invalidUsername)
+		}
+	}
+	if len(failedUsernames) > 0 {
+		t.Errorf("invalid usernames marked as valid: %v", failedUsernames)
+	}
 }

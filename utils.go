@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"regexp"
 	"strings"
 
 	"golang.org/x/crypto/bcrypt"
@@ -13,6 +14,8 @@ var EmailDomainpartMaxLength = 253
 var PasswordMinimumLength = 8
 var PasswordMandatorySpecialCharacters = true
 var PasswordMandatoryNumbers = true
+var UsernameMinLength = 4
+var UsernameMaxLength = 64
 
 var UtilsErrorEmail = "E_EMAIL_INVALID"
 
@@ -78,6 +81,32 @@ func (utility *UtilityFunctions) ValidatePassword(password string) error {
 		return &ValidationError{
 			Code:    "E_PASSWORD_NO_NUMBERS",
 			Message: "password should contain at least one numerical character",
+		}
+	}
+	return nil
+}
+
+func (*UtilityFunctions) ValidateUsername(username string) error {
+	test, err := regexp.Compile(`^[a-zA-Z0-9]+[a-zA-Z0-9_\-\.]*[a-zA-Z0-9]$`)
+	if err != nil {
+		panic(err)
+	}
+	if len(username) < UsernameMinLength {
+		return &ValidationError{
+			Code:    "E_USERNAME_TOO_SHORT",
+			Message: fmt.Sprintf("username ('%v') should be more than %v characters", username, UsernameMinLength-1),
+		}
+	}
+	if len(username) > UsernameMaxLength {
+		return &ValidationError{
+			Code:    "E_USERNAME_TOO_LONG",
+			Message: fmt.Sprintf("username ('%v') should be less than %v characters", username, UsernameMaxLength),
+		}
+	}
+	if !test.MatchString(username) {
+		return &ValidationError{
+			Code:    "E_USERNAME_INVALID_CHARACTERS",
+			Message: fmt.Sprintf("username ('%v') should be alpha-numeric and cannot start/end with any of [-, _, .]", username),
 		}
 	}
 	return nil

@@ -1,3 +1,5 @@
+GOLANG_DEV_VERSION=0.1.5
+
 init: # initialises this directory - use once only
 	@$(MAKE) _dev ARG="init"
 build: # builds the application - outputs an `app` binary
@@ -7,7 +9,7 @@ test: build # runs tests in watch-mode
 test.once: build # runs tests once
 	@$(MAKE) _dev ARG="test -coverprofile c.out"
 start: # starts the development environment
-	@UID=$$(id -u) docker-compose up -V app
+	@UID=$$(id -u) docker-compose up ${ARGS} app
 migrate: # starts the migrator in the development enviornment
 	@UID=$$(id -u) docker-compose run migrator
 start.once: build # runs the application on the host network
@@ -21,4 +23,4 @@ version.get: # retrieves the latest version we are at
 version.bump: # bumps the version by 1: specify VERSION as "patch", "minor", or "major", to be specific about things
 	@docker run -v "$(CURDIR):/app" zephinzer/vtscripts:latest iterate ${VERSION} -i
 _dev: # base command to run (do not use)
-	@docker run -it --network host -u $$(id -u) -v "$(CURDIR)/.cache/pkg:/go/pkg" -v "$(CURDIR):/go/src/app" zephinzer/golang-dev:latest ${ARG}
+	@docker run -it --network host -u $$(id -u) -v "$(CURDIR)/.cache/pkg:/go/pkg" -v "$(CURDIR):/go/src/app" zephinzer/golang-dev:$(GOLANG_DEV_VERSION) ${ARG}

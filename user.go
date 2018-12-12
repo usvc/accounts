@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"strings"
 
 	"github.com/go-sql-driver/mysql"
 )
@@ -12,6 +13,7 @@ type User struct {
 	Uuid         string `json:"uuid"`
 	Email        string `json:"email"`
 	Username     string `json:"username"`
+	Password     string `json:"password"`
 	DateCreated  string `json:"date_created"`
 	LastModified string `json:"last_modified"`
 }
@@ -48,6 +50,10 @@ var (
 	UserErrorCreateInvalidEmail = "E_USER_CREATE_INVALID_EMAIL"
 	// UserErrorCreateInvalidPassword for invalid passwords
 	UserErrorCreateInvalidPassword = "E_USER_CREATE_INVALID_PASSWORD"
+	// UserErrorUpdateMissingUuid for when UUID is not provided
+	UserErrorUpdateMissingUuid = "E_USER_UPDATE_MISSING_UUID"
+	// UserErrorDeleteMissingUuid for when UUID is not provided
+	UserErrorDeleteMissingUuid = "E_USER_DELETE_MISSING_UUID"
 )
 
 var userStatementsPrepared = false
@@ -166,7 +172,15 @@ USER QUERY
 
 func (user *User) Query(database *sql.DB, startIndex uint, limit uint) *[]User {
 	logger.Infof("[user] querying %v users starting from index %v...", limit, startIndex)
-	stmt, err := database.Prepare("SELECT uuid, email, username, date_created, last_modified FROM accounts LIMIT ?,?")
+	users := user.query(database, startIndex, limit)
+	logger.Infof("[user] queried %v users (requested for %v)", len(*users), limit)
+	return users
+}
+
+func (user *User) query(database *sql.DB, startIndex uint, limit uint) *[]User {
+	sqlStmt := "SELECT uuid, email, username, date_created, last_modified FROM accounts LIMIT ?,?"
+	logger.Infof("[user] executing sql '%s'", sqlStmt)
+	stmt, err := database.Prepare(sqlStmt)
 	if err != nil {
 		panic(err)
 	}
@@ -194,7 +208,6 @@ func (user *User) Query(database *sql.DB, startIndex uint, limit uint) *[]User {
 			LastModified: lastModified.String,
 		})
 	}
-	logger.Infof("[user] queried %v users (requested for %v)", len(users), limit)
 	return &users
 }
 
@@ -211,14 +224,16 @@ func (user *User) GetByUUID(database *sql.DB, uuid string) *User {
 
 	userRow := user.getByUUID(database, uuid)
 
-	logger.Infof("[user] retrieved user with UUID '%v'", uuid)
+	logger.Infof("[user] retrieved user with uuid '%v'", uuid)
 
 	return userRow
 }
 
 // getByUUID executes the database operations for GetByUUID()
 func (*User) getByUUID(database *sql.DB, uuid string) *User {
-	stmt, err := database.Prepare("SELECT email, username, date_created, last_modified FROM accounts WHERE uuid = ?")
+	sqlStmt := "SELECT email, username, date_created, last_modified FROM accounts WHERE uuid = ?"
+	logger.Infof("[user] executing sql '%s'", sqlStmt)
+	stmt, err := database.Prepare(sqlStmt)
 	if err != nil {
 		panic(err)
 	}
@@ -254,7 +269,9 @@ func (*User) getByUUID(database *sql.DB, uuid string) *User {
 // getById executes the database operations to retrieve a user identified by
 // the ID :id
 func (*User) getByID(database *sql.DB, id int64) *User {
-	stmt, err := database.Prepare("SELECT uuid, email, username, date_created, last_modified FROM accounts WHERE id = ?")
+	sqlStmt := "SELECT uuid, email, username, date_created, last_modified FROM accounts WHERE id = ?"
+	logger.Infof("[user] executing sql '%s'", sqlStmt)
+	stmt, err := database.Prepare(sqlStmt)
 	if err != nil {
 		panic(err)
 	}
@@ -282,6 +299,71 @@ func (*User) getByID(database *sql.DB, id int64) *User {
 
 /*
 -------------------------------------------------------------------------------
+USER UPDATING
+#update
+-------------------------------------------------------------------------------
+*/
+
+// UpdateByUUID updates a user identified by their UUID in :userData.UUID
+func (user *User) UpdateByUUID(database *sql.DB, userData *User) {
+	if len(userData.Uuid) == 0 {
+		panic(&UserError{
+			Code:    UserErrorUpdateMissingUuid,
+			Message: "a uuid has to be provided to update the user",
+			Data:    userData,
+		})
+	} else if len(userData.Email) > 0 {
+		if err := utils.ValidateEmail(userData.Email); err != nil {
+			panic(&UserError{
+				Code:    err.(*ValidationError).Code,
+				Message: err.(*ValidationError).Message,
+				Data:    map[string]interface{}{"email": userData.Email},
+			})
+		}
+	} else if len(userData.Username) > 0 {
+		if err := utils.ValidateUsername(userData.Username); err != nil {
+			panic(&UserError{
+				Code:    err.(*ValidationError).Code,
+				Message: err.(*ValidationError).Message,
+				Data:    map[string]interface{}{"username": userData.Username},
+			})
+		}
+	}
+	user.updateByUUID(database, userData)
+}
+
+func (user *User) updateByUUID(database *sql.DB, userData *User) {
+	var setters []string
+	var params []interface{}
+	if len(userData.Email) > 0 {
+		setters = append(setters, "email=?")
+		params = append(params, userData.Email)
+	}
+	if len(userData.Username) > 0 {
+		setters = append(setters, "username=?")
+		params = append(params, userData.Username)
+	}
+	params = append(params, userData.Uuid)
+	sqlStmt := fmt.Sprintf("UPDATE accounts SET %s WHERE uuid=?", strings.Join(setters, ","))
+	logger.Infof("[user] executing sql '%s'", sqlStmt)
+	stmt, err := database.Prepare(sqlStmt)
+	if err != nil {
+		panic(err)
+	}
+	results, err := stmt.Exec(params...)
+	if err != nil {
+		panic(err)
+	}
+	rowsAffected, err := results.RowsAffected()
+	if err != nil {
+		panic(err)
+	} else if rowsAffected == 0 {
+		user.GetByUUID(database, userData.Uuid)
+	}
+}
+
+/*
+-------------------------------------------------------------------------------
 USER REMOVAL
 #delete #remove #account #user
 -------------------------------------------------------------------------------
@@ -294,7 +376,7 @@ func (user *User) DeleteByUUID(database *sql.DB, uuid string) {
 
 	if len(uuid) == 0 {
 		panic(&UserError{
-			Code:    UserErrorCreateMissingParameters,
+			Code:    UserErrorDeleteMissingUuid,
 			Message: "missing 'uuid' parameter",
 		})
 	}
@@ -307,12 +389,17 @@ func (user *User) DeleteByUUID(database *sql.DB, uuid string) {
 // deleteByUUID defines the database operations for removing a user identified
 // by :uuid
 func (*User) deleteByUUID(database *sql.DB, uuid string) {
-	stmt, err := database.Prepare("DELETE FROM accounts WHERE uuid = ?")
+	sqlStmt := "DELETE FROM accounts WHERE uuid = ?"
+	logger.Infof("[user] executing sql '%s'", sqlStmt)
+	stmt, err := database.Prepare(sqlStmt)
 	if err != nil {
 		panic(err)
 	}
-	exec, err := stmt.Exec(uuid)
-	rowsAffected, err := exec.RowsAffected()
+	results, err := stmt.Exec(uuid)
+	if err != nil {
+		panic(err)
+	}
+	rowsAffected, err := results.RowsAffected()
 	if err != nil {
 		panic(err)
 	} else if rowsAffected == 0 {
