@@ -23,8 +23,6 @@ var (
 	ServerErrorOK = "E_SERVER_OK"
 )
 
-var server = Server{}
-
 func (server *Server) init(opts *ServerOptions) {
 	server.options = opts
 	server.router = http.NewServeMux()

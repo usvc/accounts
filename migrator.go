@@ -19,26 +19,15 @@ type Migrator struct {
 	options  *MigratorConnectionOptions
 }
 
-// MigratorConnectionOptions for initializing the migrator
 type MigratorConnectionOptions struct {
-	Host     string
-	Port     string
-	Database string
-	User     string
-	Password string
+	Host                      string
+	Port                      string
+	Database                  string
+	User                      string
+	Password                  string
+	ConnectionRetryIntervalMs time.Duration
+	ConnectionRetryAttempts   uint
 }
-
-type migratorConstSettings struct {
-	maxRetries      uint
-	retryIntervalMs uint
-}
-
-var migratorSettings = migratorConstSettings{
-	maxRetries:      3,
-	retryIntervalMs: 5000,
-}
-
-var migrator = Migrator{}
 
 func (migrator *Migrator) run(opts *MigratorConnectionOptions) {
 	migrator.options = opts
@@ -128,10 +117,14 @@ func (migrator *Migrator) getDriver() database.Driver {
 	var currentTry uint
 	var driver database.Driver
 	var err error
-	for currentTry = 0; currentTry < migratorSettings.maxRetries; currentTry++ {
+	for currentTry = 0; currentTry < migrator.options.ConnectionRetryAttempts; currentTry++ {
 		if driver, err = mysql.WithInstance(migrator.db, &mysql.Config{}); err != nil {
-			logger.Errorf("[migrator] failed to get driver (current try: %v/%v), error: %s", currentTry, migratorSettings.maxRetries, err)
-			time.Sleep(time.Duration(migratorSettings.retryIntervalMs) * time.Millisecond)
+			logger.Errorf("[migrator] failed to get driver (current try: %v/%v), error: %s",
+				currentTry,
+				migrator.options.ConnectionRetryAttempts,
+				err,
+			)
+			time.Sleep(migrator.options.ConnectionRetryIntervalMs * time.Millisecond)
 		} else {
 			return driver
 		}
