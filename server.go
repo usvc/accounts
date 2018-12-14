@@ -28,6 +28,8 @@ func (server *Server) init(opts *ServerOptions) {
 	server.router = http.NewServeMux()
 	userAPI := UserAPI{}
 	userAPI.Handle(server.router)
+	securityAPI := SecurityAPI{}
+	securityAPI.Handle(server.router)
 	server.handle(server.router)
 	server.listen()
 }

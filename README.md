@@ -35,6 +35,7 @@ See [the roadmap section](#roadmap) for future developements.
 | GET | /user/:uuid | Returns the user identified by the :uuid | 0.0.1 | [#2](//github.com/usvc/accounts/issues/2) |
 | PATCH | /user/:uuid | Updates a field of the user identified by :uuid | 0.0.3 | [#4](//github.com/usvc/accounts/issues/4) |
 | DELETE | /user/:uuid | Deletes the user identified by the :uuid | 0.0.1 | [#3](//github.com/usvc/accounts/issues/3) |
+| PATCH | /security/:user_uuid | Updates the password for the user identified by the :user_uuid | 0.0.4 | [#7](//github.com/usvc/accounts/issues/7) |
 | POST | /session | Logs a user in | **TODO** | N/A |
 | DELETE | /session | Logs a user out | **TODO** | N/A |
 | GET | /metrics | Returns Prometheus metrics | **TODO** | N/A |
@@ -42,6 +43,7 @@ See [the roadmap section](#roadmap) for future developements.
 | GET | /readyz | Returns 200 OK if ready to accept connections | **TODO** | N/A |
 
 > Refer to [the User documentation](./docs/User.md) for details on the user endpoints.  
+> Refer to [the Security documentation](./docs/Security.md) for detials on the security endpoints.
 > Refer to [session.api.go](./session.api.go) for details on the session endpoints.
 
 # Configuration

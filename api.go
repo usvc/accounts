@@ -7,6 +7,10 @@ import (
 	"time"
 )
 
+var (
+	APIErrorGeneric = "E_API_GENERIC"
+)
+
 type APIHandler func(http.ResponseWriter, *http.Request)
 
 func (this APIHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -15,6 +19,13 @@ func (this APIHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			logger.Errorf("[api] %v", r)
 			var response APIResponse
 			switch t := r.(type) {
+			case *SecurityError:
+				w.WriteHeader(400)
+				response = APIResponse{
+					Code:    t.Code,
+					Message: t.Message,
+					Data:    t.Data,
+				}
 			case *UserAPIError:
 				w.WriteHeader(400)
 				response = APIResponse{
@@ -32,7 +43,7 @@ func (this APIHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			default:
 				w.WriteHeader(500)
 				response = APIResponse{
-					Code:    UserAPIErrorCreateGeneric,
+					Code:    APIErrorGeneric,
 					Message: "",
 					Data:    r,
 				}
