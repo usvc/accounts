@@ -15,7 +15,7 @@ An accounts microservice for easy addition of a login requirement to your system
 - [x] Updating of existing users' account information
 
 ### 0.0.4
-- [ ] Updating of existing users' password
+- [x] Updating of existing users' password
 
 ### 0.1.0
 - [ ] Logging in of existing users via password
