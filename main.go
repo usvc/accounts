@@ -16,13 +16,14 @@ const applicationStartImage = `
 func main() {
 	defer func() {
 		if r := recover(); r != nil {
-			logger.WithStackf("%s", r)
+			logger.Error("[main] uncaught exception, see next log for details")
+			logger.Error(r)
 		}
 	}()
 	config := Configuration{}
 	config.Init()
 	fmt.Println(applicationStartImage)
-	logger.Init(&LoggerOptions{
+	loggerConfig.Init(&LoggerOptions{
 		EnableSourceMap:   config.LogSourceMap,
 		EnablePrettyPrint: config.LogPrettyPrint,
 		Format:            config.LogFormat,
