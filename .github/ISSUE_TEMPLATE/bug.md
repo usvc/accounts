@@ -1,19 +1,21 @@
-# Overview
+# Bug Report
 
-<!-- fill up the title above ^, and write a short description of the error here -->
-
-## Current Behaviour
-
-<!-- how does it behave now? -->
+<!-- a short description of the error here -->
 
 ## Expected Behaviour
 
-<!-- how should it behave in an ideal world -->
+It should ... <!-- how should it behave in an ideal world -->
+
+## Current Behaviour
+
+But it ... <!-- how does it behave now? -->
 
 # System Information (optional/as-required)
 
-* Operating system: <!-- run: `uname -a` -->
-* Running as user: <!-- run: `id -u` -->
-* Docker client version: <!-- run: `docker version -f '{{.Client.Version}}/{{.Client.APIVersion}}'` -->
-* Docker server version: <!-- run: `docker version -f '{{.Server.Version}}/{{.Server.APIVersion}}'` -->
-* Make version: <!-- run: `make --v` -->
+* Operating system: <!-- output of: `uname -a` -->
+* Running as user: <!-- output of: `id -u` -->
+* Docker image and tag: <!-- if you're running this in one, eg: `alpine:3.8` -->
+* Docker client version: <!-- output of: `docker version -f '{{.Client.Version}}/{{.Client.APIVersion}}'` -->
+* Docker server version: <!-- output of: `docker version -f '{{.Server.Version}}/{{.Server.APIVersion}}'` -->
+* Docker Compose version: <!-- output of `docker-compose version --short` -->
+* Make version: <!-- output of: `make --v` -->
