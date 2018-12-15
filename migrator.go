@@ -11,7 +11,7 @@ import (
 	_ "github.com/golang-migrate/migrate/source/file"
 )
 
-// Migrator class for migrating data schemas
+// Migrator module for migrating data schemas
 type Migrator struct {
 	db       *sql.DB
 	driver   database.Driver
@@ -19,6 +19,7 @@ type Migrator struct {
 	options  *MigratorConnectionOptions
 }
 
+// MigratorConnectionOptions for initialising the Migrator module
 type MigratorConnectionOptions struct {
 	Host                      string
 	Port                      string

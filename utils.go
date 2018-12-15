@@ -9,29 +9,45 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-var EmailLocalpartMaxLength = 63
-var EmailDomainpartMaxLength = 253
-var PasswordMinimumLength = 8
-var PasswordMandatorySpecialCharacters = true
-var PasswordMandatoryNumbers = true
-var UsernameMinLength = 4
-var UsernameMaxLength = 64
+var (
+	// EmailLocalpartMaxLength sets the maximum length of the email address's localpart
+	EmailLocalpartMaxLength = 63
+	// EmailDomainpartMaxLength sets the maximum length of the email address's domain
+	EmailDomainpartMaxLength = 253
+	// PasswordMinimumLength sets the minimum length of the password
+	PasswordMinimumLength = 8
+	// PasswordMandatorySpecialCharacters indicates whether special characters are mandatory
+	PasswordMandatorySpecialCharacters = true
+	// PasswordMandatoryNumbers indicates whether numerical characters are mandatory
+	PasswordMandatoryNumbers = true
+	// UsernameMinLength sets the minimum length of the username
+	UsernameMinLength = 4
+	// UsernameMaxLength sets the maximum length of the username
+	UsernameMaxLength = 64
+	// UtilsErrorEmail is the error when the email is invalid
+	UtilsErrorEmail = "E_EMAIL_INVALID"
+)
 
-var UtilsErrorEmail = "E_EMAIL_INVALID"
-
+// ValidationError provides a standardised error structure
+// for validation errors
 type ValidationError struct {
 	Code    string
 	Message string
 }
 
+// Error enables ValidationError to be processed as an error type
 func (self *ValidationError) Error() string {
 	return fmt.Sprintf("%s: %s", self.Code, self.Message)
 }
 
+// UtilityFunctions module provides utility functions for the rest of
+// of the service
 type UtilityFunctions struct{}
 
+// export it for use globally
 var utils = UtilityFunctions{}
 
+// CreatePasswordHash creates a hash give nthe password :password
 func (*UtilityFunctions) CreatePasswordHash(password string) (string, error) {
 	inBytes := []byte(password)
 	hashedBytes, err := bcrypt.GenerateFromPassword(inBytes, bcrypt.DefaultCost)
@@ -41,6 +57,8 @@ func (*UtilityFunctions) CreatePasswordHash(password string) (string, error) {
 	return string(hashedBytes[:]), nil
 }
 
+// VerifyPasswordHash verifies that the provided :password when hashed
+// equals the :hash
 func (*UtilityFunctions) VerifyPasswordHash(hash string, password string) error {
 	inBytes := []byte(password)
 	hashedBytes := []byte(hash)

@@ -12,6 +12,8 @@ start: # starts the development environment
 	@UID=$$(id -u) docker-compose up ${ARGS} app
 start.once: build # runs the application on the host network
 	@$(MAKE) _dev ARG="start"
+stop: # stops the development environment
+	@UID=$$(id -u) docker-compose down ${ARGS}
 migrate: # starts the migrator in the development enviornment
 	@UID=$$(id -u) docker-compose run migrator
 db: # creates a shell into the database (requires database to be running)

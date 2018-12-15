@@ -4,6 +4,7 @@ import (
 	"database/sql"
 )
 
+// Security module for handling security related account data
 type Security struct {
 	Password string `json:"password"`
 }

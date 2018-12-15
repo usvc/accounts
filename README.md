@@ -50,14 +50,18 @@ See [the roadmap section](#roadmap) for future developements.
 
 | Key | Default | Description |
 | --- | --- | --- |
-| ENVIRONMENT | development | Defines the environment we will be running in |
-| INTERFACE | 0.0.0.0 | Defines the interface the server should bind to |
-| PORT | 3000 | Defines the port the server should listen on |
-| DB_HOST | database | Defines the hostname of the database instance |
-| DB_PORT | 3306 | Defines the port which the database instance is listening on |
-| DB_DATABASE | database | Defines the schema name to use upon a successful connection |
-| DB_USER | user | Defines the user of the database instance |
-| DB_PASSWORD | password | Defines the password of the user defined in `DB_USER` |
+| ENVIRONMENT | `"development"` | Defines the environment we will be running in |
+| INTERFACE | `"0.0.0.0"` | Defines the interface the server should bind to |
+| PORT | `3000` | Defines the port the server should listen on |
+| LOG_FORMAT | `"text"` | Either 'text' or 'json' |
+| LOG_LEVEL | `"trace"` | Defines minimum level of the logs to print - choose from 'trace', 'debug', 'info', 'warn', 'error', 'panic', 'fatal' |
+| LOG_SOURCE_MAP | `true` | Defines whether to print the source of the log call |
+| LOG_PRETTY_PRINT | `true` | Defines whether to output the logs in a human-optimised manner |
+| DB_HOST | `"database"` | Defines the hostname of the database instance |
+| DB_PORT | `3306` | Defines the port which the database instance is listening on |
+| DB_DATABASE | `"database"` | Defines the schema name to use upon a successful connection |
+| DB_USER | `"user"` | Defines the user of the database instance |
+| DB_PASSWORD | `"password"` | Defines the password of the user defined in `DB_USER` |
 
 > Refer to [config.go](./config.go) for details
 

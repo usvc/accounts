@@ -9,11 +9,15 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
+// Database is the primary module for interacting with
+// persistent data
 type Database struct {
 	inst    *sql.DB
 	options *DatabaseConnectionOptions
 }
 
+// DatabaseConnectionOptions provides a class for configuring
+// the database module
 type DatabaseConnectionOptions struct {
 	Host                      string
 	Port                      string
@@ -26,12 +30,14 @@ type DatabaseConnectionOptions struct {
 
 var db Database
 
+// Init initialises the database module
 func (database *Database) Init(opts *DatabaseConnectionOptions) {
 	database.options = opts
 	database.createConnection()
 	database.validateConnection()
 }
 
+// Get returns the database instance
 func (database *Database) Get() *sql.DB {
 	return database.inst
 }

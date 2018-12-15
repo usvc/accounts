@@ -8,12 +8,16 @@ import (
 )
 
 var (
+	// APIErrorGeneric is for errors where we have no idea what's going on
 	APIErrorGeneric = "E_API_GENERIC"
 )
 
+// APIHandler is the wrapper around all API calls so that we can return
+// a consistent schema for responses
 type APIHandler func(http.ResponseWriter, *http.Request)
 
-func (this APIHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+// ServeHTTP allows us to interface with the http.Handle
+func (apiHandler APIHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if r := recover(); r != nil {
 			logger.Errorf("[api] %v", r)
@@ -51,9 +55,10 @@ func (this APIHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			response.send(w)
 		}
 	}()
-	this(w, r)
+	apiHandler(w, r)
 }
 
+// APIResponse is the schema we use for returning data to the consumer
 type APIResponse struct {
 	Code      string      `json:"error_code"`
 	Message   string      `json:"message"`

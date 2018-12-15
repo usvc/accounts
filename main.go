@@ -19,10 +19,15 @@ func main() {
 			logger.WithStackf("%s", r)
 		}
 	}()
-	fmt.Println(applicationStartImage)
-	logger.init(config.Environment)
-	logger.Info("[main] initialising configurations...")
+	config := Configuration{}
 	config.Init()
+	fmt.Println(applicationStartImage)
+	logger.Init(&LoggerOptions{
+		EnableSourceMap:   config.LogSourceMap,
+		EnablePrettyPrint: config.LogPrettyPrint,
+		Format:            config.LogFormat,
+		Level:             config.LogLevel,
+	})
 	logger.Info("[main] initialising database connection...")
 	db.Init(&DatabaseConnectionOptions{
 		Host:                      config.DatabaseHost,

@@ -69,7 +69,7 @@ func (userApi *UserAPI) handleUpdateUser(router *mux.Router) {
 			var userData User
 			body, _ := ioutil.ReadAll(r.Body)
 			json.Unmarshal(body, &userData)
-			userData.Uuid = params["uuid"]
+			userData.UUID = params["uuid"]
 			user.UpdateByUUID(db.Get(), &userData)
 			response := APIResponse{
 				Code:    UserAPIErrorUpateOk,

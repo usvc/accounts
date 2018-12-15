@@ -26,10 +26,13 @@ var (
 func (server *Server) init(opts *ServerOptions) {
 	server.options = opts
 	server.router = http.NewServeMux()
+	// wire up the user layer
 	userAPI := UserAPI{}
 	userAPI.Handle(server.router)
+	// wire up the security layer
 	securityAPI := SecurityAPI{}
 	securityAPI.Handle(server.router)
+	// let it go wild
 	server.handle(server.router)
 	server.listen()
 }

@@ -10,7 +10,7 @@ import (
 
 // User is used for returning user data
 type User struct {
-	Uuid         string `json:"uuid"`
+	UUID         string `json:"uuid"`
 	Email        string `json:"email"`
 	Username     string `json:"username"`
 	Password     string `json:"password"`
@@ -50,10 +50,10 @@ var (
 	UserErrorCreateInvalidEmail = "E_USER_CREATE_INVALID_EMAIL"
 	// UserErrorCreateInvalidPassword for invalid passwords
 	UserErrorCreateInvalidPassword = "E_USER_CREATE_INVALID_PASSWORD"
-	// UserErrorUpdateMissingUuid for when UUID is not provided
-	UserErrorUpdateMissingUuid = "E_USER_UPDATE_MISSING_UUID"
-	// UserErrorDeleteMissingUuid for when UUID is not provided
-	UserErrorDeleteMissingUuid = "E_USER_DELETE_MISSING_UUID"
+	// UserErrorUpdateMissingUUID for when UUID is not provided
+	UserErrorUpdateMissingUUID = "E_USER_UPDATE_MISSING_UUID"
+	// UserErrorDeleteMissingUUID for when UUID is not provided
+	UserErrorDeleteMissingUUID = "E_USER_DELETE_MISSING_UUID"
 )
 
 var userStatementsPrepared = false
@@ -67,6 +67,8 @@ USER CREATION
 -------------------------------------------------------------------------------
 */
 
+// Create adds a new account into persistent storage using
+// parameters from the :newUser parameter
 func (user *User) Create(database *sql.DB, newUser UserNew) *User {
 	logger.Infof("[user] creating user with email '%s'", newUser.Email)
 
@@ -97,7 +99,7 @@ func (user *User) Create(database *sql.DB, newUser UserNew) *User {
 
 	userRow := user.create(database, &newUser)
 
-	logger.Infof("[user] created user with email '%s' - uuid is '%s'", newUser.Email, userRow.Uuid)
+	logger.Infof("[user] created user with email '%s' - uuid is '%s'", newUser.Email, userRow.UUID)
 
 	return userRow
 }
@@ -170,6 +172,7 @@ USER QUERY
 -------------------------------------------------------------------------------
 */
 
+// Query queries :limit users given a starting index :startIndex
 func (user *User) Query(database *sql.DB, startIndex uint, limit uint) *[]User {
 	logger.Infof("[user] querying %v users starting from index %v...", limit, startIndex)
 	users := user.query(database, startIndex, limit)
@@ -201,7 +204,7 @@ func (user *User) query(database *sql.DB, startIndex uint, limit uint) *[]User {
 			panic(err)
 		}
 		users = append(users, User{
-			Uuid:         uuid.String,
+			UUID:         uuid.String,
 			Email:        email.String,
 			Username:     username.String,
 			DateCreated:  dateCreated.String,
@@ -258,7 +261,7 @@ func (*User) getByUUID(database *sql.DB, uuid string) *User {
 		}
 	}
 	return &User{
-		Uuid:         uuid,
+		UUID:         uuid,
 		Email:        email.String,
 		Username:     username.String,
 		DateCreated:  dateCreated.String,
@@ -289,7 +292,7 @@ func (*User) getByID(database *sql.DB, id int64) *User {
 		panic(err)
 	}
 	return &User{
-		Uuid:         uuid.String,
+		UUID:         uuid.String,
 		Email:        email.String,
 		Username:     username.String,
 		DateCreated:  dateCreated.String,
@@ -306,9 +309,9 @@ USER UPDATING
 
 // UpdateByUUID updates a user identified by their UUID in :userData.UUID
 func (user *User) UpdateByUUID(database *sql.DB, userData *User) {
-	if len(userData.Uuid) == 0 {
+	if len(userData.UUID) == 0 {
 		panic(&UserError{
-			Code:    UserErrorUpdateMissingUuid,
+			Code:    UserErrorUpdateMissingUUID,
 			Message: "a uuid has to be provided to update the user",
 			Data:    userData,
 		})
@@ -343,7 +346,7 @@ func (user *User) updateByUUID(database *sql.DB, userData *User) {
 		setters = append(setters, "username=?")
 		params = append(params, userData.Username)
 	}
-	params = append(params, userData.Uuid)
+	params = append(params, userData.UUID)
 	sqlStmt := fmt.Sprintf("UPDATE accounts SET %s WHERE uuid=?", strings.Join(setters, ","))
 	logger.Infof("[user] executing sql '%s'", sqlStmt)
 	stmt, err := database.Prepare(sqlStmt)
@@ -358,7 +361,7 @@ func (user *User) updateByUUID(database *sql.DB, userData *User) {
 	if err != nil {
 		panic(err)
 	} else if rowsAffected == 0 {
-		user.GetByUUID(database, userData.Uuid)
+		user.GetByUUID(database, userData.UUID)
 	}
 }
 
@@ -376,7 +379,7 @@ func (user *User) DeleteByUUID(database *sql.DB, uuid string) {
 
 	if len(uuid) == 0 {
 		panic(&UserError{
-			Code:    UserErrorDeleteMissingUuid,
+			Code:    UserErrorDeleteMissingUUID,
 			Message: "missing 'uuid' parameter",
 		})
 	}
