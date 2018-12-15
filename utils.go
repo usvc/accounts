@@ -36,8 +36,8 @@ type ValidationError struct {
 }
 
 // Error enables ValidationError to be processed as an error type
-func (self *ValidationError) Error() string {
-	return fmt.Sprintf("%s: %s", self.Code, self.Message)
+func (validationError *ValidationError) Error() string {
+	return fmt.Sprintf("%s: %s", validationError.Code, validationError.Message)
 }
 
 // UtilityFunctions module provides utility functions for the rest of
@@ -104,6 +104,7 @@ func (utility *UtilityFunctions) ValidatePassword(password string) error {
 	return nil
 }
 
+// ValidateUsername validates the username :username
 func (*UtilityFunctions) ValidateUsername(username string) error {
 	test, err := regexp.Compile(`^[a-zA-Z0-9]+[a-zA-Z0-9_\-\.]*[a-zA-Z0-9]$`)
 	if err != nil {
