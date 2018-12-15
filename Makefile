@@ -16,6 +16,8 @@ stop: # stops the development environment
 	@UID=$$(id -u) docker-compose down ${ARGS}
 migrate: # starts the migrator in the development enviornment
 	@UID=$$(id -u) docker-compose run migrator
+shell: # creates a shell into the application container (requires application to be running)
+	@docker exec -it $$(docker ps | grep $$(basename $$(pwd)) | grep app | cut -f 1 -d ' ') /bin/bash -l
 db: # creates a shell into the database (requires database to be running)
 	@docker exec -it $$(docker ps | grep $$(basename $$(pwd)) | grep database | cut -f 1 -d ' ') mysql -uroot -ptoor
 logs: # displays the application logs
