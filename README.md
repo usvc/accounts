@@ -1,28 +1,16 @@
 # usvc/accounts
-An accounts microservice for easy addition of a login requirement to your system
+An accounts microservice for easy addition of a login requirement to your system.
 
-# Scope of Component
+# Current Scope of Component (For Version 1.0)
 
-## Version 1.0
-### 0.0.1
-- [x] Registration of new users using an email address and password
-- [x] Removal of an existing user from the system
-
-### 0.0.2
+- [x] User account creation with email/password
+- [x] Updating of user's account information
+- [x] Deletion of an existing user
+- [x] Retrieval of a user's account information
 - [x] Retrieval of a list of users
-
-### 0.0.3
-- [x] Updating of existing users' account information
-
-### 0.0.4
-- [x] Updating of existing users' password
-
-### 0.1.0
-- [ ] Logging in of existing users via password
-- [ ] Logging out of existing users
-
-### 0.2.0
-- [ ] Session maintenance of existing users
+- [ ] Session creation (logging in)
+- [ ] Session status retrieval (still logged in?)
+- [ ] Session deletion (logging out)
 
 See [the roadmap section](#roadmap) for future developements.
 
@@ -109,6 +97,16 @@ Run `app --migrate` to run the migrations.
 
 # Roadmap
 
+## Version 1.0
+- [x] Registration of new users using an email address and password
+- [x] Removal of an existing user from the system
+- [x] Retrieval of a list of users
+- [x] Updating of existing users' account information
+- [x] Updating of existing users' password
+- [ ] Logging in of existing users via password
+- [ ] Logging out of existing users
+- [ ] Session maintenance of existing users
+
 ## Version 2.0
 
 - [ ] Creation of profiles associated with accounts
@@ -123,5 +121,23 @@ Run `app --migrate` to run the migrations.
 - [ ] Audit trail of session creation/destruction
 - [ ] Audit trail of user's actions
 
+# Changelog
+
+### 0.0.5
+- [x] Enable configuring of the logging format
+
+### 0.0.4
+- [x] Updating of existing users' password
+
+### 0.0.3
+- [x] Updating of existing users' account information
+
+### 0.0.2
+- [x] Retrieval of a list of users
+
+### 0.0.1
+- [x] Registration of new users using an email address and password
+- [x] Removal of an existing user from the system
+
 # License
-This project is licensed under [the MIT license](./LICENSE).
+This project is licensed under [the MIT license](./LICENSE). Feel free to fork it and create your own!
