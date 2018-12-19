@@ -8,9 +8,10 @@ An accounts microservice for easy addition of a login requirement to your system
 - [x] Deletion of an existing user
 - [x] Retrieval of a user's account information
 - [x] Retrieval of a list of users
-- [ ] Session creation (logging in)
+- [x] Session creation
+- [ ] Authentication with email/username and password
 - [ ] Session status retrieval (still logged in?)
-- [ ] Session deletion (logging out)
+- [ ] Session deletion
 
 See [the roadmap section](#roadmap) for future developements.
 
@@ -24,15 +25,19 @@ See [the roadmap section](#roadmap) for future developements.
 | PATCH | /user/:uuid | Updates a field of the user identified by :uuid | 0.0.3 | [#4](//github.com/usvc/accounts/issues/4) |
 | DELETE | /user/:uuid | Deletes the user identified by the :uuid | 0.0.1 | [#3](//github.com/usvc/accounts/issues/3) |
 | PATCH | /security/:user_uuid | Updates the password for the user identified by the :user_uuid | 0.0.4 | [#7](//github.com/usvc/accounts/issues/7) |
-| POST | /session | Logs a user in | **TODO** | N/A |
-| DELETE | /session | Logs a user out | **TODO** | N/A |
+| POST | /auth | Logs a user in | **TODO** | N/A |
+| DELETE | /auth | Logs a user out | **TODO** | N/A |
+| POST | /session | Creates the user session | **TODO** | [#12](//github.com/usvc/accounts/issues/12) |
+| DELETE | /session | Destroys the user session | **TODO** | [#13](//github.com/usvc/accounts/issues/13) |
 | GET | /metrics | Returns Prometheus metrics | **TODO** | N/A |
-| GET | /healthz | Returns 200 OK if healthy | **TODO** | N/A |
-| GET | /readyz | Returns 200 OK if ready to accept connections | **TODO** | N/A |
+| GET | /healthz | Returns 200 OK if healthy | **TODO** | [#8](//github.com/usvc/accounts/issues/8) |
+| GET | /readyz | Returns 200 OK if ready to accept connections | **TODO** | [#9](//github.com/usvc/accounts/issues/9) |
 
 > Refer to [the User documentation](./docs/User.md) for details on the user endpoints.  
-> Refer to [the Security documentation](./docs/Security.md) for detials on the security endpoints.
-> Refer to [session.api.go](./session.api.go) for details on the session endpoints.
+>
+> Refer to [the Security documentation](./docs/Security.md) for detials on the security endpoints.  
+>
+> Refer to [the Session documentation](./docs/Session.md) for details on the session endpoints.
 
 # Configuration
 
