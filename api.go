@@ -23,6 +23,13 @@ func (apiHandler APIHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			logger.Errorf("[api] %v", r)
 			var response APIResponse
 			switch t := r.(type) {
+			case *SessionError:
+				w.WriteHeader(400)
+				response = APIResponse{
+					Code:    t.Code,
+					Message: t.Message,
+					Data:    t.Data,
+				}
 			case *SecurityError:
 				w.WriteHeader(400)
 				response = APIResponse{

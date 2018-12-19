@@ -6,7 +6,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// Logger represents a dependency inversion for logging
+// LoggerConfig provides a way to configure the logger
 type LoggerConfig struct {
 	options *LoggerOptions
 }
