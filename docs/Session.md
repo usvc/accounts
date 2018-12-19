@@ -1,7 +1,23 @@
 # Sessions
 
 ## Creating New Sessions
-See [the User module documentation](./User.md) for information on how to create a new User. You'll need the User's UUID for the calls below.
+> See [the User module documentation](./User.md) for information on how to create a new User. You'll need the User's UUID for the calls below.
+
+| Request | Value |
+| --- | --- |
+| Method | `POST` |
+| URL | `/session` |
+
+| Body Parameter | Description |
+| --- | --- |
+| account_uuid | UUID of the user (**required**) |
+| ipv4 | IP address (version 4) where the session was started |
+| ipv6 | IP address (version 6) where the session was started |
+| source | A source for where the user session is being created for |
+| device | A device code for where the device the user is using |
+| token_refresh | The refresh token for the user |
+| token_access | The access token for the user |
+| date_expires | A timestamp for the expiry of this session |
 
 ### Example
 ```sh
