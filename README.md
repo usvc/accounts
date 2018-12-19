@@ -87,10 +87,11 @@ Run `app --migrate` to run the migrations.
 # Contribution
 
 ## Contributors
-1. [Create a new issue](https://github.com/usvc/accounts/issues/new)
-2. Make changes to the codebase
-3. Prefix your commits with a `[#?]` where `?` is the issue number
-4. Push your changes
+1. [Create a new issue](https://github.com/usvc/accounts/issues/new) (if one isn't already available)
+1. Create a new branch with a descriptive title like `feature-<ISSUE_NUMBER>/describe-it-briefly` and create a pull request (PR). Prefix the PR with `WIP` while it's still in progress
+1. Make changes to the codebase on your branch
+1. Finalise your PR, remove the `WIP` and prefix your PR title with a `[#?]` where `?` is the issue number
+1. Squash and merge when ready and close the issue
 
 ## Others
 1. Fork this repository
