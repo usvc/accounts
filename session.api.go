@@ -9,6 +9,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
+// SessionAPI is the API handler for the /session/* endpoint
 type SessionAPI struct {
 	router *mux.Router
 }
@@ -21,14 +22,14 @@ type SessionAPIError struct {
 }
 
 var (
-	// SessionAPIErrorOK
+	// SessionAPIErrorOK indicates a call to /session/* is ok
 	SessionAPIErrorOK = "E_SESSIONS_API_OK"
-	// SessionAPIErrorNotImplemented
-	SessionAPIErrorNotImplemented = "E_SESSIONS_API_TODO"
-	// SessionAPIUrlStub
+	// SessionAPIErrorCreateOK indicates call to POST /session is ok
+	SessionAPIErrorCreateOK = "E_SESSIONS_API_CREATE_OK"
+	// SessionAPIUrlStub represents the endpoint at /session
 	SessionAPIUrlStub = "/session"
-	// SessionAPIExtUrlStub
-	SessionAPIExtUrlStub = "/session/"
+	// SessionAPIExtURLStub represents the endpoint at /session/*
+	SessionAPIExtURLStub = "/session/"
 )
 
 // Error implements the error type
@@ -41,7 +42,7 @@ func (sessionAPI *SessionAPI) Handle(router *http.ServeMux) {
 	sessionAPI.router = mux.NewRouter()
 	sessionAPI.handleCreateSessions()
 	router.Handle(SessionAPIUrlStub, sessionAPI.router)
-	router.Handle(SessionAPIExtUrlStub, sessionAPI.router)
+	router.Handle(SessionAPIExtURLStub, sessionAPI.router)
 }
 
 func (sessionAPI *SessionAPI) handleCreateSessions() {
@@ -53,9 +54,8 @@ func (sessionAPI *SessionAPI) handleCreateSessions() {
 			json.Unmarshal(body, &session)
 			session.Create(db.Get())
 			response := APIResponse{
-				Code:    SessionAPIErrorNotImplemented,
-				Message: "",
-				Data:    session,
+				Code:    SessionAPIErrorCreateOK,
+				Message: "ok",
 			}
 			response.send(w)
 		}),

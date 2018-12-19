@@ -31,42 +31,61 @@ type SessionError struct {
 var (
 	// SessionErrorOk indicates nothing went wrong
 	SessionErrorOk = "E_SESSION_OK"
+	// SessionErrorCreate indicates the session creation failed
+	SessionErrorCreate = "E_SESSION_CREATE"
 )
 
-// Create
+// Create , well, creates a new session
 func (session *Session) Create(database *sql.DB) {
 	logger.Infof("[session] creating new session (AccountUUID:%v,)", session.AccountUUID)
 
 	// validation
+	// this verifies the user exists
+	user := User{}
+	user.GetByUUID(database, session.AccountUUID)
 
 	// insert into the database
 	session.create(database)
 }
 
+// create , well, creates the session in persistent storage
 func (session *Session) create(database *sql.DB) {
+	// at this point, user exists, let's go
+	sqlStmt, values := session.getCreateSQL()
+	logger.Infof("[session] executing sql '%s'", sqlStmt)
+	if stmt, err := database.Prepare(sqlStmt); err != nil {
+		panic(err)
+	} else if results, err := stmt.Exec(values...); err != nil {
+		panic(err)
+	} else if rowsAffected, err := results.RowsAffected(); err != nil {
+		panic(err)
+	} else if rowsAffected != 1 {
+		// this basically means we screwed up somewhere
+		panic(&SessionError{
+			Code:    SessionErrorCreate,
+			Message: "something went wrong while creating a new session, are your parameters correct?",
+			Data:    session,
+		})
+	}
+}
+
+// getCreateSQL returns the sql statement as a string and a slice representing values
+// to be fed into an .Exec
+func (session *Session) getCreateSQL() (string, []interface{}) {
 	var insertionsArray []string
 	var valuePlaceholdersArray []string
-	var values = []interface{}{
+	var valuesArray = []interface{}{
 		session.AccountUUID,
 	}
 	sqlStmtStub := "INSERT INTO sessions (account_id %s) VALUES ((SELECT id FROM accounts WHERE uuid = ?) %s)"
-	if len(session.IPv4) > 0 {
-		insertionsArray = append(insertionsArray, "ipv4")
-		values = append(values, session.IPv4)
-	}
-	if len(session.IPv6) > 0 {
-		insertionsArray = append(insertionsArray, "ipv6")
-		values = append(values, session.IPv6)
-	}
-	if len(session.Source) > 0 {
-		insertionsArray = append(insertionsArray, "source")
-		values = append(values, session.Source)
-	}
-	if len(session.Device) > 0 {
-		insertionsArray = append(insertionsArray, "device")
-		values = append(values, session.Device)
-	}
-	for i := 1; i < len(values); i++ {
+	session.insertStringIntoInsertionArray(&insertionsArray, &valuesArray, session.IPv4, "ipv4")
+	session.insertStringIntoInsertionArray(&insertionsArray, &valuesArray, session.IPv6, "ipv6")
+	session.insertStringIntoInsertionArray(&insertionsArray, &valuesArray, session.Source, "source")
+	session.insertStringIntoInsertionArray(&insertionsArray, &valuesArray, session.Device, "device")
+	session.insertStringIntoInsertionArray(&insertionsArray, &valuesArray, session.TokenRefresh, "token_refresh")
+	session.insertStringIntoInsertionArray(&insertionsArray, &valuesArray, session.TokenAccess, "token_access")
+	session.insertStringIntoInsertionArray(&insertionsArray, &valuesArray, session.DateExpires, "date_expires")
+	for i := 1; i < len(valuesArray); i++ {
 		valuePlaceholdersArray = append(valuePlaceholdersArray, "?")
 	}
 	insertions := strings.Join(insertionsArray, ", ")
@@ -76,17 +95,17 @@ func (session *Session) create(database *sql.DB) {
 		valuePlaceholders = fmt.Sprintf(", %s", valuePlaceholders)
 	}
 	sqlStmt := fmt.Sprintf(sqlStmtStub, insertions, valuePlaceholders)
-	logger.Infof("[session] executing sql '%s'", sqlStmt)
-	stmt, err := database.Prepare(sqlStmt)
-	if err != nil {
-		panic(err)
+	return sqlStmt, valuesArray
+}
+
+func (session *Session) insertStringIntoInsertionArray(
+	insertionsArray *[]string,
+	valuesArray *[]interface{},
+	value string,
+	label string,
+) {
+	if len(value) > 0 {
+		*insertionsArray = append(*insertionsArray, label)
+		*valuesArray = append(*valuesArray, value)
 	}
-	logger.Info(values)
-	results, err := stmt.Exec(values...)
-	if err != nil {
-		panic(err)
-	}
-	logger.Info(stmt)
-	logger.Info(insertions)
-	logger.Info(results)
 }
