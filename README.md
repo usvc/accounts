@@ -27,7 +27,7 @@ See [the roadmap section](#roadmap) for future developements.
 | PATCH | /security/:user_uuid | Updates the password for the user identified by the :user_uuid | 0.0.4 | [#7](//github.com/usvc/accounts/issues/7) |
 | POST | /auth | Logs a user in | **TODO** | N/A |
 | DELETE | /auth | Logs a user out | **TODO** | N/A |
-| POST | /session | Creates the user session | **TODO** | [#12](//github.com/usvc/accounts/issues/12) |
+| POST | /session | Creates the user session | 0.0.6 | [#12](//github.com/usvc/accounts/issues/12) |
 | DELETE | /session | Destroys the user session | **TODO** | [#13](//github.com/usvc/accounts/issues/13) |
 | GET | /metrics | Returns Prometheus metrics | **TODO** | N/A |
 | GET | /healthz | Returns 200 OK if healthy | **TODO** | [#8](//github.com/usvc/accounts/issues/8) |
@@ -127,6 +127,9 @@ Run `app --migrate` to run the migrations.
 - [ ] Audit trail of user's actions
 
 # Changelog
+
+### 0.0.6
+- [x] Added session creation at `POST /session`
 
 ### 0.0.5
 - [x] Enable configuring of the logging format
