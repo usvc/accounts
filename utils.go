@@ -59,10 +59,10 @@ func (*UtilityFunctions) CreatePasswordHash(password string) (string, error) {
 
 // VerifyPasswordHash verifies that the provided :password when hashed
 // equals the :hash
-func (*UtilityFunctions) VerifyPasswordHash(hash string, password string) error {
+func (*UtilityFunctions) VerifyPasswordHash(password string, hash string) error {
 	inBytes := []byte(password)
 	hashedBytes := []byte(hash)
-	return bcrypt.CompareHashAndPassword(inBytes, hashedBytes)
+	return bcrypt.CompareHashAndPassword(hashedBytes, inBytes)
 }
 
 // ValidateEmail returns an error if the :email is not valid

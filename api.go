@@ -10,6 +10,8 @@ import (
 var (
 	// APIErrorGeneric is for errors where we have no idea what's going on
 	APIErrorGeneric = "E_API_GENERIC"
+	// APIErrorTodo is for to-be implemented endpoints
+	APIErrorTodo = "E_API_TODO"
 )
 
 // APIHandler is the wrapper around all API calls so that we can return
@@ -17,52 +19,71 @@ var (
 type APIHandler func(http.ResponseWriter, *http.Request)
 
 // ServeHTTP allows us to interface with the http.Handle
-func (apiHandler APIHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (apiHandler APIHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
+	start := time.Now()
 	defer func() {
 		if r := recover(); r != nil {
 			logger.Errorf("[api] %v", r)
 			var response APIResponse
 			switch t := r.(type) {
+			case *AuthError:
+				res.WriteHeader(400)
+				response = APIResponse{
+					Code:    t.Code,
+					Message: t.Message,
+					Data:    t.Data,
+				}
 			case *SessionError:
-				w.WriteHeader(400)
+				res.WriteHeader(400)
 				response = APIResponse{
 					Code:    t.Code,
 					Message: t.Message,
 					Data:    t.Data,
 				}
 			case *SecurityError:
-				w.WriteHeader(400)
+				res.WriteHeader(400)
 				response = APIResponse{
 					Code:    t.Code,
 					Message: t.Message,
 					Data:    t.Data,
 				}
 			case *UserAPIError:
-				w.WriteHeader(400)
+				res.WriteHeader(400)
 				response = APIResponse{
 					Code:    t.Code,
 					Message: t.Message,
 					Data:    t.Data,
 				}
 			case *UserError:
-				w.WriteHeader(400)
+				res.WriteHeader(400)
 				response = APIResponse{
 					Code:    t.Code,
 					Message: t.Message,
 					Data:    t.Data,
 				}
 			default:
-				w.WriteHeader(500)
+				res.WriteHeader(500)
 				response = APIResponse{
 					Code:    APIErrorGeneric,
 					Message: "",
 					Data:    r,
 				}
 			}
-			response.send(w)
+			response.send(res)
+			logger.Info(res.Header())
+		} else {
+			logger.Info(map[string]interface{}{
+				"proto":        req.Proto,
+				"method":       req.Method,
+				"path":         req.URL.Path,
+				"hostname":     req.Host,
+				"remoteAddr":   req.RemoteAddr,
+				"responseTime": time.Since(start).Seconds() * 1000,
+				"userAgent":    req.Header.Get("user-agent"),
+			})
 		}
 	}()
-	apiHandler(w, r)
+	apiHandler(res, req)
 }
 
 // APIResponse is the schema we use for returning data to the consumer
