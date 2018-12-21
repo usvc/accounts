@@ -9,7 +9,7 @@ An accounts microservice for easy addition of a login requirement to your system
 - [x] Retrieval of a user's account information
 - [x] Retrieval of a list of users
 - [x] Session creation
-- [ ] Authentication with email/username and password
+- [x] Authentication with email/username and password
 - [ ] Session status retrieval (still logged in?)
 - [ ] Session deletion
 
@@ -25,8 +25,7 @@ See [the roadmap section](#roadmap) for future developements.
 | PATCH | /user/:uuid | Updates a field of the user identified by :uuid | 0.0.3 | [#4](//github.com/usvc/accounts/issues/4) |
 | DELETE | /user/:uuid | Deletes the user identified by the :uuid | 0.0.1 | [#3](//github.com/usvc/accounts/issues/3) |
 | PATCH | /security/:user_uuid | Updates the password for the user identified by the :user_uuid | 0.0.4 | [#7](//github.com/usvc/accounts/issues/7) |
-| POST | /auth | Logs a user in | **TODO** | N/A |
-| DELETE | /auth | Logs a user out | **TODO** | N/A |
+| POST | /auth/credentials | Verifies a user's email/username and password matches | 0.0.7 | [#24](//github.com/usvc/accounts/issues/24) |
 | POST | /session | Creates the user session | 0.0.6 | [#12](//github.com/usvc/accounts/issues/12) |
 | DELETE | /session | Destroys the user session | **TODO** | [#13](//github.com/usvc/accounts/issues/13) |
 | GET | /metrics | Returns Prometheus metrics | **TODO** | N/A |
@@ -38,6 +37,8 @@ See [the roadmap section](#roadmap) for future developements.
 > Refer to [the Security documentation](./docs/Security.md) for detials on the security endpoints.  
 >
 > Refer to [the Session documentation](./docs/Session.md) for details on the session endpoints.
+>
+> Refer to [the Auth documentation](./docs/Auth.md) for details on the authentication endpoints.
 
 # Configuration
 
@@ -109,7 +110,7 @@ Run `app --migrate` to run the migrations.
 - [x] Retrieval of a list of users
 - [x] Updating of existing users' account information
 - [x] Updating of existing users' password
-- [ ] Logging in of existing users via password
+- [x] Logging in of existing users via password
 - [ ] Logging out of existing users
 - [ ] Session maintenance of existing users
 

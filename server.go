@@ -27,17 +27,21 @@ func (server *Server) init(opts *ServerOptions) {
 	server.options = opts
 	server.router = http.NewServeMux()
 	// wire up the user layer
-	logger.Info("registering user api...")
+	logger.Info("[server] registering user api...")
 	userAPI := UserAPI{}
 	userAPI.Handle(server.router)
 	// wire up the security layer
-	logger.Info("registering security api...")
+	logger.Info("[server] registering security api...")
 	securityAPI := SecurityAPI{}
 	securityAPI.Handle(server.router)
 	// wire up the sessions layer
-	logger.Info("registering session api...")
+	logger.Info("[server] registering session api...")
 	sessionAPI := SessionAPI{}
 	sessionAPI.Handle(server.router)
+	// wire up the auth layer
+	logger.Info("[server] registering auth api...")
+	authAPI := AuthAPI{}
+	authAPI.Handle(server.router)
 	// let it go wild
 	server.handle(server.router)
 	server.listen()
