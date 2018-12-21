@@ -130,24 +130,27 @@ Run `app --migrate` to run the migrations.
 
 # Changelog
 
+### 0.0.7
+- [x] Added endpoint for verification of credentials at `POST /auth/credentials`. See [the Auth documentation](./docs/Auth.md) for more information.
+
 ### 0.0.6
-- [x] Added session creation at `POST /session`
+- [x] Added session creation at `POST /session`. See [the Session documentation](./docs/Session.md) for more information.
 
 ### 0.0.5
-- [x] Enable configuring of the logging format
+- [x] Enable configuring of the logging format via `LOG_FORMAT`, `LOG_LEVEL`, `LOG_SOURCE_MAP` and `LOG_PRETTY_PRINT` environment variables.
 
 ### 0.0.4
-- [x] Updating of existing users' password
+- [x] Added endpoint for updating of existing users' password. See [the Security documentation](./docs/Security.md) for more information.
 
 ### 0.0.3
-- [x] Updating of existing users' account information
+- [x] Updating of existing users' account information. See [the User documentation](./docs/User.md) for more information.
 
 ### 0.0.2
-- [x] Retrieval of a list of users
+- [x] Retrieval of a list of users. See [the User documentation](./docs/User.md) for more information.
 
 ### 0.0.1
-- [x] Registration of new users using an email address and password
-- [x] Removal of an existing user from the system
+- [x] Registration of new users using an email address and password.
+- [x] Removal of an existing user from the system.
 
 # License
 This project is licensed under [the MIT license](./LICENSE). Feel free to fork it and create your own!
