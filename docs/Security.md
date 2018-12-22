@@ -1,3 +1,17 @@
+---
+title: Security Documentation
+authors:
+- zephinzer
+tags:
+- security
+- update
+- password
+- credential
+created_at: 2018-12-22
+updated_at: 2018-12-22
+tldr: Documentation for the `/security` endpoint and related entities
+path: docs/Security
+---
 # Security
 
 ## Updating a User's Password
