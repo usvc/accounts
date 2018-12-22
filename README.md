@@ -70,23 +70,6 @@ Run `app --migrate` to run the migrations.
 
 > Refer to [main.go](./main.go) for the various usable flags.
 
-# Contribution
-
-## Contributors
-1. [Create a new issue](https://github.com/usvc/accounts/issues/new) (if one isn't already available)
-1. Create a new branch with a descriptive title like `feature-<ISSUE_NUMBER>/describe-it-briefly` and create a pull request (PR). Prefix the PR with `WIP` while it's still in progress
-1. Make changes to the codebase on your branch
-1. Finalise your PR, remove the `WIP` and prefix your PR title with a `[#?]` where `?` is the issue number
-1. Squash and merge when ready and close the issue
-
-## Others
-1. Fork this repository
-2. [Create a new issue on this repository](https://github.com/usvc/accounts/issues/new)
-3. Make changes to the `master` branch of your fork
-4. Push your changes to your fork
-5. Raise a pull request to this repository and prefix the title with a `[#?]` where `?` is the issue number
-6. Ping a contributor if you're getting impatient
-
 # Roadmap
 
 ## Version 1.0
@@ -112,6 +95,55 @@ Run `app --migrate` to run the migrations.
 - [ ] Logging in of existing users via an email message
 - [ ] Audit trail of session creation/destruction
 - [ ] Audit trail of user's actions
+
+# Development/Contribution
+If you'd like to contribute, clone this repository and read on!
+
+## Pre-Requisites
+- Docker
+- Docker Compose
+- Make
+
+## Development Recipes
+We use the Makefile to run development tasks. The [Makefile](./Makefile) contains comments which describes what each recipe does. Below is a list of those you'd more commonly use.
+
+### Start the Project
+Use `make start` to start the application on a development machine. If you haven't migrated the database before, run the migration (next point)
+
+### Migrate the Database
+Use `make migrate` in another terminal to run the migration.
+
+### Run Tests in Auto-Reload
+Use `make test` to start the tests.
+
+### Viewing the Documentation on the Knowledge Repository
+Use `make docs.view` to start the Knowledge Repository server.
+
+### Adding Documentation to the Knowledge Repository
+Use `make docs.add DOC="/path/to/doc"`.
+
+### Updating Documentation on the Knowledge Repository
+Use `make docs.update DOC="/path/to/doc"`.
+
+### Build the Binary
+Use `make build` to build the binary.
+
+## Workflow
+### For Contributors
+1. [Create a new issue](https://github.com/usvc/accounts/issues/new) (if one isn't already available)
+1. Create a new branch with a descriptive title like `feature-<ISSUE_NUMBER>/describe-it-briefly` and create a pull request (PR). Prefix the PR with `WIP` while it's still in progress
+1. Make changes to the codebase on your branch
+1. Finalise your PR, remove the `WIP` and prefix your PR title with a `[#?]` where `?` is the issue number
+1. Squash and merge when ready and close the issue
+1. After merging, if a milestone is achieved, tag it using `make version.bump BUMP=$BUMP_WHAT` where `$BUMP_WHAT` is either `"patch"`, `"minor"`, or `"major"`.
+
+### Others
+1. Fork this repository
+2. [Create a new issue on this repository](https://github.com/usvc/accounts/issues/new)
+3. Make changes to the `master` branch of your fork
+4. Push your changes to your fork
+5. Raise a pull request to this repository and prefix the title with a `[#?]` where `?` is the issue number
+6. Ping a contributor if you're getting impatient
 
 # Changelog
 
