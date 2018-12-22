@@ -34,6 +34,11 @@ func (authCredentials *AuthCredentials) Authenticate(database *sql.DB) {
 			Message: "either 'username' or 'email', and 'password', should be specified",
 		})
 	}
+	if hasUsername {
+		logger.Infof("[auth] authenticating username '%s'", authCredentials.Username)
+	} else if hasEmail {
+		logger.Infof("[auth] authenticating email '%s'", authCredentials.Email)
+	}
 	authCredentials.authenticate(database)
 }
 
@@ -53,6 +58,7 @@ func (authCredentials *AuthCredentials) authenticate(database *sql.DB) {
 		sqlStmt = fmt.Sprintf("%s acc.email = ?", sqlStmtStub)
 		accountIdentifier = authCredentials.Email
 	}
+	logger.Infof("[auth] executing sql '%s'", sqlStmt)
 	if stmt, err := database.Prepare(sqlStmt); err != nil {
 		panic(err)
 	} else if row := stmt.QueryRow(accountIdentifier); err != nil {
