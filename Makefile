@@ -32,6 +32,10 @@ db: # creates a shell into the database (requires database to be running)
 	@docker exec -it $$(docker ps | grep $$(basename $$(pwd)) | grep database | cut -f 1 -d ' ') mysql -uroot -ptoor
 logs: # displays the application logs
 	@docker logs -f $$(docker ps | grep $$(basename $$(pwd)) | grep app | cut -f 1 -d ' ')
+docs.add: # adds a document to the knowledge repository
+	knowledge_repo --repo $(CURDIR) add ${DOC}
+docs.view: # starts the knowledge repository server
+	knowledge_repo --repo $(CURDIR) runserver
 version.get: # retrieves the latest version we are at
 	@docker run -v "$(CURDIR):/app" zephinzer/vtscripts:latest get-latest -q
 version.bump: # bumps the version by 1: specify VERSION as "patch", "minor", or "major", to be specific about things

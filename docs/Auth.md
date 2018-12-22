@@ -1,3 +1,16 @@
+---
+title: Authentication Documentation
+authors:
+- zephinzer
+tags:
+- authentication
+- api
+- controller
+created_at: 2018-12-22
+updated_at: 2018-12-22
+tldr: Documentation for the `/auth` endpoint and related entities
+path: docs/Auth
+---
 # Authentication Mechanisms
 
 ## Authenticating via Credentials

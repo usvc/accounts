@@ -10,7 +10,7 @@ tags:
 created_at: 2018-12-20
 updated_at: 2018-12-20
 tldr: We shall separate authentication mechanisms from session creation/maintenance
-path: docs/adr
+path: docs/kr/20181220-decoupling-session-authentication
 ---
 
 # Title
