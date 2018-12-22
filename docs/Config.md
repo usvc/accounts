@@ -11,7 +11,7 @@ tags:
 created_at: 2018-12-22
 updated_at: 2018-12-22
 tldr: Documentation for environment variables that can be used to configure this
-path: docs/Config.md
+path: docs/Config
 ---
 # Configuration
 Configurations are initialised in the `config.go` file
