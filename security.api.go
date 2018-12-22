@@ -36,12 +36,12 @@ func (securityApi *SecurityAPI) updatePassword(router *mux.Router) {
 	router.Handle(
 		SecurityAPIExtURLStub+"{account_uuid}",
 		APIHandler(func(w http.ResponseWriter, r *http.Request) {
+			var security Security
 			params := mux.Vars(r)
-			accountUUID := params["account_uuid"]
-			var passwordData Security
 			body, _ := ioutil.ReadAll(r.Body)
-			json.Unmarshal(body, &passwordData)
-			securityApi.model.UpdatePasswordByUUID(db.Get(), passwordData.Password, accountUUID)
+			json.Unmarshal(body, &security)
+			security.AccountUUID = params["account_uuid"]
+			security.UpdatePasswordByUUID(db.Get())
 			response := APIResponse{
 				Code:    SecurityAPIErrorPasswordChangeOk,
 				Message: "ok",
