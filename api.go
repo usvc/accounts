@@ -23,7 +23,7 @@ type APIError struct {
 }
 
 func (apiError *APIError) Error() string {
-	return fmt.Sprintf("[user.api] %v:%v", apiError.Code, apiError.Message)
+	return fmt.Sprintf("[api] %v:%v", apiError.Code, apiError.Message)
 }
 
 // APIHandler is the wrapper around all API calls so that we can return
