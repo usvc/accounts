@@ -1,3 +1,18 @@
+---
+title: Session Documentation
+authors:
+- zephinzer
+tags:
+- session
+- update
+- user
+- account
+- api
+created_at: 2018-12-22
+updated_at: 2018-12-22
+tldr: Documentation for the `/session` endpoint and related entities
+path: docs/Session
+---
 # Sessions
 
 ## Creating New Sessions
