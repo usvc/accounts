@@ -1,5 +1,5 @@
 ---
-title: Decoupling of Session and Authentication logical entities
+title: "ADR: Decoupling of Session and Authentication logical entities"
 authors:
 - zephinzer
 tags:
@@ -10,11 +10,11 @@ tags:
 created_at: 2018-12-20
 updated_at: 2018-12-20
 tldr: We shall separate authentication mechanisms from session creation/maintenance
-path: docs/kr/20181220-decoupling-session-authentication
+path: docs/adr/20181220-decoupling-session-authentication
 ---
 
 # Title
-Decoupling of Session and Authentication logical entities
+ADR: Decoupling of Session and Authentication logical entities
 
 # Status
 Approved
