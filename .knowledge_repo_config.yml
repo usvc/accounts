@@ -4,8 +4,8 @@
 # The accepted path patterns should be provided as a dictionary mapping regex
 # patterns to descriptions of that pattern.
 path_patterns:
-  'docs/docs/.*': "Documentation"
   'docs/adr/.*': "Architecture decision records"
+  'docs/docs': "Documentation"
 
 # A dictionary of aliases which point to knowledge posts. This allows you to alias posts
 # which may be useful to forward old links to new locations, or to give certain posts
