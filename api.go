@@ -14,6 +14,18 @@ var (
 	APIErrorTodo = "E_API_TODO"
 )
 
+// APIError is a wrapper error type for errors originating from
+// the API layer
+type APIError struct {
+	Code    string
+	Message string
+	Data    interface{}
+}
+
+func (apiError *APIError) Error() string {
+	return fmt.Sprintf("[user.api] %v:%v", apiError.Code, apiError.Message)
+}
+
 // APIHandler is the wrapper around all API calls so that we can return
 // a consistent schema for responses
 type APIHandler func(http.ResponseWriter, *http.Request)
@@ -26,35 +38,14 @@ func (apiHandler APIHandler) ServeHTTP(res http.ResponseWriter, req *http.Reques
 			logger.Errorf("[api] %v", r)
 			var response APIResponse
 			switch t := r.(type) {
-			case *AuthError:
+			case *ModelError:
 				res.WriteHeader(400)
 				response = APIResponse{
 					Code:    t.Code,
 					Message: t.Message,
 					Data:    t.Data,
 				}
-			case *SessionError:
-				res.WriteHeader(400)
-				response = APIResponse{
-					Code:    t.Code,
-					Message: t.Message,
-					Data:    t.Data,
-				}
-			case *SecurityError:
-				res.WriteHeader(400)
-				response = APIResponse{
-					Code:    t.Code,
-					Message: t.Message,
-					Data:    t.Data,
-				}
-			case *UserAPIError:
-				res.WriteHeader(400)
-				response = APIResponse{
-					Code:    t.Code,
-					Message: t.Message,
-					Data:    t.Data,
-				}
-			case *UserError:
+			case *APIError:
 				res.WriteHeader(400)
 				response = APIResponse{
 					Code:    t.Code,

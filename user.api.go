@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -36,17 +35,6 @@ var (
 // UserAPI is the controller layer
 type UserAPI struct {
 	router *mux.Router
-}
-
-// UserAPIError is the standardised error for this module
-type UserAPIError struct {
-	Code    string
-	Message string
-	Data    interface{}
-}
-
-func (userApiError *UserAPIError) Error() string {
-	return fmt.Sprintf("[user.api] %v:%v", userApiError.Code, userApiError.Message)
 }
 
 // Handle takes in a router and provisions it with the user API
@@ -91,7 +79,7 @@ func (userApi *UserAPI) handleQueryUsers(router *mux.Router) {
 			if len(query["start_at"]) > 0 {
 				_startIndex, err := strconv.Atoi(query["start_at"][0])
 				if err != nil {
-					panic(&UserAPIError{
+					panic(&APIError{
 						Code:    UserAPIErrorQueryInvalidParameters,
 						Message: err.Error(),
 						Data:    query["start_at"][0],
@@ -103,7 +91,7 @@ func (userApi *UserAPI) handleQueryUsers(router *mux.Router) {
 			if len(query["limit"]) > 0 {
 				_dataLimit, err := strconv.Atoi(query["limit"][0])
 				if err != nil {
-					panic(&UserAPIError{
+					panic(&APIError{
 						Code:    UserAPIErrorQueryInvalidParameters,
 						Message: err.Error(),
 						Data:    query["limit"][0],

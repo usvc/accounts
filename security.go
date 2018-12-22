@@ -9,18 +9,11 @@ type Security struct {
 	Password string `json:"password"`
 }
 
-// SecurityError represents a logical error instead of a system one
-type SecurityError struct {
-	Message string
-	Code    string
-	Data    interface{}
-}
-
 // UpdatePasswordByUUID sets the password of the user identified by account UUID :accountUUID
 // to the :password.
 func (security *Security) UpdatePasswordByUUID(database *sql.DB, password string, accountUUID string) {
 	if err := utils.ValidatePassword(password); err != nil {
-		panic(&SecurityError{
+		panic(&ModelError{
 			Code:    err.(*ValidationError).Code,
 			Message: err.(*ValidationError).Message,
 			Data:    map[string]interface{}{}, // reveal nothing, it's the password (:

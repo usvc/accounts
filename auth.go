@@ -14,17 +14,6 @@ type AuthCredentials struct {
 	TokenAccess  string `json:"token_access"`
 }
 
-// AutheCredentialsError for authentication credential errors
-type AuthError struct {
-	Code    string
-	Message string
-	Data    interface{}
-}
-
-func (authError *AuthError) Error() string {
-	return fmt.Sprintf("%s:%s", authError.Code, authError.Message)
-}
-
 var (
 	// AuthErrorMissingParams indicates a missing username/email
 	AuthErrorMissingParams = "E_AUTH_CREDENTIALS_MISSING_PARAMS"
@@ -40,7 +29,7 @@ func (authCredentials *AuthCredentials) Authenticate(database *sql.DB) {
 	hasEmail := len(authCredentials.Email) > 0
 	hasPassword := len(authCredentials.Password) > 0
 	if (!hasUsername && !hasEmail) || !hasPassword {
-		panic(&AuthError{
+		panic(&ModelError{
 			Code:    AuthErrorMissingParams,
 			Message: "either 'username' or 'email', and 'password', should be specified",
 		})
@@ -72,14 +61,14 @@ func (authCredentials *AuthCredentials) authenticate(database *sql.DB) {
 		var passwordHash sql.NullString
 		if err = row.Scan(&passwordHash); err != nil {
 			if err == sql.ErrNoRows {
-				panic(&AuthError{
+				panic(&ModelError{
 					Code:    AuthErrorInvalidParams,
 					Message: "the email/username/password combination does not exist",
 				})
 			}
 		}
 		if err := utils.VerifyPasswordHash(authCredentials.Password, passwordHash.String); err != nil {
-			panic(&AuthError{
+			panic(&ModelError{
 				Code:    AuthErrorInvalidParams,
 				Message: "the email/username/password combination does not exist",
 			})

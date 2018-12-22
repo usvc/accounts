@@ -21,13 +21,6 @@ type Session struct {
 	LastModified string `json:"last_modified"`
 }
 
-// SessionError represents a logical error instead of a system one
-type SessionError struct {
-	Message string
-	Code    string
-	Data    interface{}
-}
-
 var (
 	// SessionErrorOk indicates nothing went wrong
 	SessionErrorOk = "E_SESSION_OK"
@@ -61,7 +54,7 @@ func (session *Session) create(database *sql.DB) {
 		panic(err)
 	} else if rowsAffected != 1 {
 		// this basically means we screwed up somewhere
-		panic(&SessionError{
+		panic(&ModelError{
 			Code:    SessionErrorCreate,
 			Message: "something went wrong while creating a new session, are your parameters correct?",
 			Data:    session,

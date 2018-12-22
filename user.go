@@ -25,18 +25,6 @@ type UserNew struct {
 	PasswordHash string `json:"password_hash"`
 }
 
-// UserError represents a logical error instead of a system one
-type UserError struct {
-	Message string
-	Code    string
-	Data    interface{}
-}
-
-// Error implementation for UserError
-func (userError *UserError) Error() string {
-	return fmt.Sprintf("%v:%v", userError.Code, userError.Message)
-}
-
 var (
 	// UserErrorNotFound for errors where user is not found
 	UserErrorNotFound = "E_USER_NOT_FOUND"
@@ -74,23 +62,23 @@ func (user *User) Create(database *sql.DB, newUser UserNew) *User {
 
 	// validate parameters
 	if len(newUser.Email) == 0 {
-		panic(&UserError{
+		panic(&ModelError{
 			Code:    UserErrorCreateMissingParameters,
 			Message: "missing 'email' parameter",
 		})
 	} else if err := utils.ValidateEmail(newUser.Email); err != nil {
-		panic(&UserError{
+		panic(&ModelError{
 			Code:    err.(*ValidationError).Code,
 			Message: err.(*ValidationError).Message,
 			Data:    map[string]interface{}{"email": newUser.Email},
 		})
 	} else if len(newUser.Password) == 0 {
-		panic(&UserError{
+		panic(&ModelError{
 			Code:    UserErrorCreateMissingParameters,
 			Message: "missing 'password' parameter",
 		})
 	} else if err := utils.ValidatePassword(newUser.Password); err != nil {
-		panic(&UserError{
+		panic(&ModelError{
 			Code:    err.(*ValidationError).Code,
 			Message: err.(*ValidationError).Message,
 			Data:    map[string]interface{}{}, // reveal nothing, it's the password (:
@@ -130,7 +118,7 @@ func (*User) createAccount(database *sql.DB, email string) int64 {
 		logger.Errorf("[user] %v", err)
 		switch err.(*mysql.MySQLError).Number {
 		case 1062:
-			panic(&UserError{
+			panic(&ModelError{
 				Code:    UserErrorCreateDuplicateEntry,
 				Message: "the user already exists",
 				Data:    map[string]interface{}{"email": email},
@@ -219,7 +207,7 @@ func (user *User) GetByUUID(database *sql.DB, uuid string) *User {
 	logger.Infof("[user] getting user with UUID '%v'", uuid)
 
 	if len(uuid) == 0 {
-		panic(&UserError{
+		panic(&ModelError{
 			Code:    UserErrorCreateMissingParameters,
 			Message: "missing 'uuid' parameter",
 		})
@@ -252,7 +240,7 @@ func (*User) getByUUID(database *sql.DB, uuid string) *User {
 	err = row.Scan(&email, &username, &dateCreated, &lastModified)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			panic(&UserError{
+			panic(&ModelError{
 				Code:    UserErrorNotFound,
 				Message: fmt.Sprintf("the user identified by %s does not exist", uuid),
 			})
@@ -310,14 +298,14 @@ USER UPDATING
 // UpdateByUUID updates a user identified by their UUID in :userData.UUID
 func (user *User) UpdateByUUID(database *sql.DB, userData *User) {
 	if len(userData.UUID) == 0 {
-		panic(&UserError{
+		panic(&ModelError{
 			Code:    UserErrorUpdateMissingUUID,
 			Message: "a uuid has to be provided to update the user",
 			Data:    userData,
 		})
 	} else if len(userData.Email) > 0 {
 		if err := utils.ValidateEmail(userData.Email); err != nil {
-			panic(&UserError{
+			panic(&ModelError{
 				Code:    err.(*ValidationError).Code,
 				Message: err.(*ValidationError).Message,
 				Data:    map[string]interface{}{"email": userData.Email},
@@ -325,7 +313,7 @@ func (user *User) UpdateByUUID(database *sql.DB, userData *User) {
 		}
 	} else if len(userData.Username) > 0 {
 		if err := utils.ValidateUsername(userData.Username); err != nil {
-			panic(&UserError{
+			panic(&ModelError{
 				Code:    err.(*ValidationError).Code,
 				Message: err.(*ValidationError).Message,
 				Data:    map[string]interface{}{"username": userData.Username},
@@ -378,7 +366,7 @@ func (user *User) DeleteByUUID(database *sql.DB, uuid string) {
 	logger.Infof("[user] removing user with UUID '%v'", uuid)
 
 	if len(uuid) == 0 {
-		panic(&UserError{
+		panic(&ModelError{
 			Code:    UserErrorDeleteMissingUUID,
 			Message: "missing 'uuid' parameter",
 		})
@@ -406,7 +394,7 @@ func (*User) deleteByUUID(database *sql.DB, uuid string) {
 	if err != nil {
 		panic(err)
 	} else if rowsAffected == 0 {
-		panic(&UserError{
+		panic(&ModelError{
 			Code:    UserErrorNotFound,
 			Message: fmt.Sprintf("user with uuid '%s' could not be found", uuid),
 		})
