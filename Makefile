@@ -34,6 +34,8 @@ logs: # displays the application logs
 	@docker logs -f $$(docker ps | grep $$(basename $$(pwd)) | grep app | cut -f 1 -d ' ')
 docs.add: # adds a document to the knowledge repository
 	knowledge_repo --repo $(CURDIR) add ${DOC}
+docs.update: # updates a document to the knowledge repository
+	knowledge_repo --repo $(CURDIR) add --update ${DOC}
 docs.view: # starts the knowledge repository server
 	knowledge_repo --repo $(CURDIR) runserver
 version.get: # retrieves the latest version we are at
