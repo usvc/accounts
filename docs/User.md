@@ -1,3 +1,17 @@
+---
+title: User Documentation
+authors:
+- zephinzer
+tags:
+- account
+- user
+- registration
+- sign up
+created_at: 2018-12-22
+updated_at: 2018-12-22
+tldr: Documentation for the `/user` endpoint and related entities
+path: docs/User
+---
 # User Accounts
 
 ## Creating a User
