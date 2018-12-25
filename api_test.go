@@ -1,6 +1,9 @@
 package main
 
 import (
+	"encoding/json"
+	"io/ioutil"
+	"net/http/httptest"
 	"testing"
 )
 
@@ -19,4 +22,57 @@ func TestAPIError(t *testing.T) {
 		}
 	}()
 	panic(&apiError)
+}
+
+func TestAPIResponseDefaults(t *testing.T) {
+	responseWriter := httptest.NewRecorder()
+	responseWriter.WriteHeader(400)
+	response := APIResponse{
+		Code:    "_code",
+		Message: "_message",
+		Data:    "_data",
+	}
+	response.send(responseWriter)
+	result := responseWriter.Result()
+
+	statusCode := result.StatusCode
+	if statusCode != 400 {
+		t.Errorf("http status code should not be modified")
+	}
+}
+
+func TestAPIResponseDataIntegrity(t *testing.T) {
+	responseWriter := httptest.NewRecorder()
+	response := APIResponse{
+		Code:    "_code",
+		Message: "_message",
+		Data:    "_data",
+	}
+	response.send(responseWriter)
+	result := responseWriter.Result()
+	statusCode := result.StatusCode
+	if statusCode != 200 {
+		t.Errorf("http status code was not 200")
+	}
+
+	contentType := result.Header.Get("Content-Type")
+	if contentType != "application/json" {
+		t.Errorf("response content-type is not application/json")
+	}
+
+	body, _ := ioutil.ReadAll(result.Body)
+	var bodyInterface map[string]interface{}
+	json.Unmarshal(body, &bodyInterface)
+	if bodyInterface["timestamp"] == nil {
+		t.Errorf("timestamp was expected but not found")
+	}
+	if bodyInterface["error_code"] != "_code" {
+		t.Errorf("error_code was improperly passed down")
+	}
+	if bodyInterface["message"] != "_message" {
+		t.Errorf("message was improperly passed down")
+	}
+	if bodyInterface["data"] != "_data" {
+		t.Errorf("data was improperly passed down")
+	}
 }
