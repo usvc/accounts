@@ -24,13 +24,13 @@ func TestAPIError(t *testing.T) {
 	panic(&apiError)
 }
 
-func TestAPIResponseDefaults(t *testing.T) {
+func TestAPIResponseCustomHTTPCode(t *testing.T) {
 	responseWriter := httptest.NewRecorder()
-	responseWriter.WriteHeader(400)
 	response := APIResponse{
 		Code:    "_code",
 		Message: "_message",
 		Data:    "_data",
+		status:  400,
 	}
 	response.send(responseWriter)
 	result := responseWriter.Result()
@@ -38,6 +38,28 @@ func TestAPIResponseDefaults(t *testing.T) {
 	statusCode := result.StatusCode
 	if statusCode != 400 {
 		t.Errorf("http status code should not be modified")
+	}
+
+	contentType := result.Header.Get("Content-Type")
+	if contentType != "application/json" {
+		t.Errorf("content-type should be enforced to application/json, got '%s'", contentType)
+	}
+}
+
+func TestAPIResponseCustomContentType(t *testing.T) {
+	responseWriter := httptest.NewRecorder()
+	response := APIResponse{
+		Code:        "_code",
+		Message:     "_message",
+		Data:        "_data",
+		contentType: "text/plain",
+	}
+	response.send(responseWriter)
+	result := responseWriter.Result()
+
+	contentType := result.Header.Get("Content-Type")
+	if contentType != "text/plain" {
+		t.Errorf("content-type should be set to text/plain, got '%s'", contentType)
 	}
 }
 
