@@ -39,40 +39,38 @@ func (apiHandler APIHandler) ServeHTTP(res http.ResponseWriter, req *http.Reques
 			var response APIResponse
 			switch t := r.(type) {
 			case *ModelError:
-				res.WriteHeader(400)
 				response = APIResponse{
 					Code:    t.Code,
 					Message: t.Message,
 					Data:    t.Data,
+					status:  400,
 				}
 			case *APIError:
-				res.WriteHeader(400)
 				response = APIResponse{
 					Code:    t.Code,
 					Message: t.Message,
 					Data:    t.Data,
+					status:  400,
 				}
 			default:
-				res.WriteHeader(500)
 				response = APIResponse{
 					Code:    APIErrorGeneric,
 					Message: "",
 					Data:    r,
+					status:  500,
 				}
 			}
 			response.send(res)
-			logger.Info(res.Header())
-		} else {
-			logger.Info(map[string]interface{}{
-				"proto":        req.Proto,
-				"method":       req.Method,
-				"path":         req.URL.Path,
-				"hostname":     req.Host,
-				"remoteAddr":   req.RemoteAddr,
-				"responseTime": time.Since(start).Seconds() * 1000,
-				"userAgent":    req.Header.Get("user-agent"),
-			})
 		}
+		logger.Info(map[string]interface{}{
+			"proto":        req.Proto,
+			"method":       req.Method,
+			"path":         req.URL.Path,
+			"hostname":     req.Host,
+			"remoteAddr":   req.RemoteAddr,
+			"responseTime": time.Since(start).Seconds() * 1000,
+			"userAgent":    req.Header.Get("user-agent"),
+		})
 	}()
 	apiHandler(res, req)
 }
