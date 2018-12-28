@@ -31,13 +31,13 @@ func (apiError *APIError) Error() string {
 type APIHandler func(http.ResponseWriter, *http.Request)
 
 // ServeHTTP allows us to interface with the http.Handle
-func (apiHandler APIHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
+func (apiHandler APIHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
 	defer func() {
-		if r := recover(); r != nil {
-			logger.Errorf("[api] %v", r)
+		if err := recover(); err != nil {
+			logger.Errorf("[api] %v", err)
 			var response APIResponse
-			switch t := r.(type) {
+			switch t := err.(type) {
 			case *ModelError:
 				response = APIResponse{
 					Code:    t.Code,
@@ -56,23 +56,23 @@ func (apiHandler APIHandler) ServeHTTP(res http.ResponseWriter, req *http.Reques
 				response = APIResponse{
 					Code:    APIErrorGeneric,
 					Message: "",
-					Data:    r,
+					Data:    err,
 					status:  500,
 				}
 			}
-			response.send(res)
+			response.send(w)
 		}
 		logger.Info(map[string]interface{}{
-			"proto":        req.Proto,
-			"method":       req.Method,
-			"path":         req.URL.Path,
-			"hostname":     req.Host,
-			"remoteAddr":   req.RemoteAddr,
+			"proto":        r.Proto,
+			"method":       r.Method,
+			"path":         r.URL.Path,
+			"hostname":     r.Host,
+			"remoteAddr":   r.RemoteAddr,
 			"responseTime": time.Since(start).Seconds() * 1000,
-			"userAgent":    req.Header.Get("user-agent"),
+			"userAgent":    r.Header.Get("user-agent"),
 		})
 	}()
-	apiHandler(res, req)
+	apiHandler(w, r)
 }
 
 // APIResponse is the schema we use for returning data to the consumer

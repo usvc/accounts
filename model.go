@@ -11,5 +11,5 @@ type ModelError struct {
 }
 
 func (modelError *ModelError) Error() string {
-	return fmt.Sprintf("[user.api] %v:%v", modelError.Code, modelError.Message)
+	return fmt.Sprintf("[model] %v:%v", modelError.Code, modelError.Message)
 }
