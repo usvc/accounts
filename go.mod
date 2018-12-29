@@ -14,4 +14,5 @@ require (
 	github.com/x-cray/logrus-prefixed-formatter v0.5.2 // indirect
 	golang.org/x/crypto v0.0.0-20180904163835-0709b304e793
 	google.golang.org/appengine v1.3.0 // indirect
+	gopkg.in/DATA-DOG/go-sqlmock.v1 v1.3.0
 )
