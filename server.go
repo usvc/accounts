@@ -26,6 +26,7 @@ var (
 func (server *Server) init(opts *ServerOptions) {
 	server.options = opts
 	server.router = http.NewServeMux()
+	databaseConnection := db.Get()
 	// wire up the user layer
 	logger.Info("[server] registering user api...")
 	userAPI := UserAPI{}
@@ -41,7 +42,7 @@ func (server *Server) init(opts *ServerOptions) {
 	// wire up the auth layer
 	logger.Info("[server] registering auth api...")
 	authAPI := AuthAPI{}
-	authAPI.Handle(server.router)
+	authAPI.Handle(server.router, databaseConnection)
 	// let it go wild
 	server.handle(server.router)
 	server.listen()

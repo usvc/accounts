@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
@@ -19,11 +20,13 @@ var (
 
 // AuthAPI handles the /auth and /auth/* endpoints
 type AuthAPI struct {
-	router *mux.Router
+	database *sql.DB
+	router   *mux.Router
 }
 
 // Handle is the handler for the AuthAPI module
-func (authAPI *AuthAPI) Handle(router *http.ServeMux) {
+func (authAPI *AuthAPI) Handle(router *http.ServeMux, database *sql.DB) {
+	authAPI.database = database
 	authAPI.router = mux.NewRouter()
 	authAPI.handleCredentialsLogin()
 	router.Handle(AuthAPIURLStub, authAPI.router)
@@ -40,7 +43,7 @@ func (authAPI *AuthAPI) handleCredentialsLogin() {
 			}
 			var authCredentials AuthCredentials
 			json.Unmarshal(body, &authCredentials)
-			authCredentials.Authenticate(db.Get())
+			authCredentials.Authenticate(authAPI.database)
 			response := APIResponse{
 				Code:    AuthAPIErrorOK,
 				Message: "ok",
