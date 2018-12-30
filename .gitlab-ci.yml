@@ -7,7 +7,8 @@ stages:
 - validation
 
 before_script:
-- apk add make
+- apk add make py-pip
+- pip install docker-compose
 
 build application binary:
   stage: validation
