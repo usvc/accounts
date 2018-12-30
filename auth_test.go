@@ -3,59 +3,70 @@ package main
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
+
 	sqlmock "gopkg.in/DATA-DOG/go-sqlmock.v1"
 )
 
-func TestAuthenticateValidationNoEmailAndUsername(t *testing.T) {
-	auth := AuthCredentials{
-		Password: "password",
-	}
-	defer func() {
-		if r := recover(); r == nil {
-			t.Errorf("expected a panic but none happened")
-		}
-	}()
-	auth.Authenticate(nil)
+const (
+	authTestPassword = "password"
+)
+
+// TestSuiteAuth is the entry struct for testing the Auth component
+type TestSuiteAuth struct {
+	suite.Suite
+	authCredentials AuthCredentials
 }
 
-func TestAuthenticateValidationOnlyUsername(t *testing.T) {
-	auth := AuthCredentials{
+// TestRunTestAuth runs the test suite
+func TestRunTestAuth(t *testing.T) {
+	suite.Run(t, new(TestSuiteAuth))
+}
+
+func (suite *TestSuiteAuth) TestNoEmailOrUsername() {
+	suite.authCredentials = AuthCredentials{
+		Password: authTestPassword,
+	}
+	defer func() {
+		assert.NotNil(suite.T(), recover())
+	}()
+	suite.authCredentials.Authenticate(nil)
+}
+
+func (suite *TestSuiteAuth) TestOnlyUsername() {
+	suite.authCredentials = AuthCredentials{
 		Username: "username",
 	}
 	defer func() {
-		if r := recover(); r == nil {
-			t.Errorf("expected a panic but none happened")
-		}
+		assert.NotNil(suite.T(), recover())
 	}()
-	auth.Authenticate(nil)
+	suite.authCredentials.Authenticate(nil)
 }
 
-func TestAuthenticateValidationOnlyEmail(t *testing.T) {
-	auth := AuthCredentials{
+func (suite *TestSuiteAuth) TestOnlyEmail() {
+	suite.authCredentials = AuthCredentials{
 		Email: "email@domain.com",
 	}
 	defer func() {
-		if r := recover(); r == nil {
-			t.Errorf("expected a panic but none happened")
-		}
+		assert.NotNil(suite.T(), recover())
 	}()
-	auth.Authenticate(nil)
+	suite.authCredentials.Authenticate(nil)
 }
 
 func TestAuthenticateUsername(t *testing.T) {
+	expectedQueryRegex := "^SELECT sec.password FROM security sec .+ WHERE acc.username = ?"
+	hashedPassword, err := utils.CreatePasswordHash(authTestPassword)
+	if err != nil {
+		t.Errorf("unexpected error while creating a mock password hash: '%s'", err)
+	}
 	db, mock, err := sqlmock.New()
 	defer db.Close()
 	if err != nil {
 		t.Errorf("unexpected error while creating database stub connection: '%s'", err)
 	}
-	password := "password"
-	hashedPassword, err := utils.CreatePasswordHash(password)
-	if err != nil {
-		t.Errorf("unexpected error while creating a mock password hash: '%s'", err)
-	}
-	mock.ExpectPrepare("^SELECT sec.password FROM security sec .+ WHERE acc.username = ?")
-	mock.
-		ExpectQuery("^SELECT sec.password FROM security sec .+ WHERE acc.username = ?").
+	mock.ExpectPrepare(expectedQueryRegex)
+	mock.ExpectQuery(expectedQueryRegex).
 		WillReturnRows(sqlmock.
 			NewRows([]string{"password"}).
 			AddRow(hashedPassword),
@@ -63,22 +74,21 @@ func TestAuthenticateUsername(t *testing.T) {
 	mock.ExpectCommit()
 	auth := AuthCredentials{
 		Username: "username",
-		Password: password,
+		Password: authTestPassword,
 	}
 	auth.Authenticate(db)
 }
 
 func TestAuthenticateEmail(t *testing.T) {
-	password := "password"
 	expectedQueryRegex := "^SELECT sec.password FROM security sec .+ WHERE acc.email = ?"
+	hashedPassword, err := utils.CreatePasswordHash(authTestPassword)
+	if err != nil {
+		t.Errorf("unexpected error while creating a mock password hash: '%s'", err)
+	}
 	db, mock, err := sqlmock.New()
 	defer db.Close()
 	if err != nil {
 		t.Errorf("unexpected error while creating database stub connection: '%s'", err)
-	}
-	hashedPassword, err := utils.CreatePasswordHash(password)
-	if err != nil {
-		t.Errorf("unexpected error while creating a mock password hash: '%s'", err)
 	}
 	mock.ExpectPrepare(expectedQueryRegex)
 	mock.
@@ -89,8 +99,8 @@ func TestAuthenticateEmail(t *testing.T) {
 		)
 	mock.ExpectCommit()
 	auth := AuthCredentials{
-		Email:    "email@dmain.com",
-		Password: password,
+		Email:    "email@domain.com",
+		Password: authTestPassword,
 	}
 	auth.Authenticate(db)
 }
