@@ -1,0 +1,33 @@
+image: docker
+
+services:
+- docker:dind
+
+stages:
+- validation
+
+before_script:
+- apk add make
+
+build application binary:
+  stage: validation
+  script:
+  - make build
+
+build application image:
+  stage: validation
+  script:
+  - make build.docker
+
+test application:
+  stage: validation
+  script:
+  - make test.once
+
+test migrations:
+  stage: validation
+  script:
+  - make start ARGS="-d"
+  - make migrate
+  - make verify.migrations
+  - make stop
