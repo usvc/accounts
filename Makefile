@@ -4,8 +4,6 @@ IMAGE_REGISTRY_URL=docker.io
 IMAGE_NAMESPACE=usvc
 IMAGE_NAME=accounts
 
-init: # initialises this directory - use once only
-	@$(MAKE) _dev ARG="init"
 build: # builds the application - outputs an `app` binary
 	@$(MAKE) _dev ARG="build"
 build.docker: # builds the application into a docker image
@@ -13,13 +11,13 @@ build.docker: # builds the application into a docker image
 		-t $(IMAGE_REGISTRY_URL)/$(IMAGE_NAMESPACE)/$(IMAGE_NAME):latest \
 		.
 test: build # runs tests in watch-mode
-	@$(MAKE) _dev ARG="test"
+	@$(MAKE) _dev RUNARGS="-it" ARG="test"
 test.once: build # runs tests once
 	@$(MAKE) _go ARG="test -coverprofile c.out"
 start: # starts the development environment
 	@UID=$$(id -u) docker-compose up ${ARGS} app
 start.once: build # runs the application on the host network
-	@$(MAKE) _dev ARG="start"
+	@$(MAKE) _dev RUNARGS="--network host" ARG="start"
 stop: # stops the development environment
 	@UID=$$(id -u) docker-compose down ${ARGS}
 migrate: # starts the migrator in the development enviornment
@@ -57,7 +55,8 @@ version.get: # retrieves the latest version we are at
 version.bump: # bumps the version by 1: specify VERSION as "patch", "minor", or "major", to be specific about things
 	@docker run -v "$(CURDIR):/app" zephinzer/vtscripts:latest iterate ${VERSION} -i
 _dev: # base command to run (do not use)
-	@docker run -it \
+	@docker run \
+		${RUNARGS} \
 		-u $$(id -u) \
 		-v "$(CURDIR)/.cache/pkg:/go/pkg" \
 		-v "$(CURDIR):/go/src/app" \
